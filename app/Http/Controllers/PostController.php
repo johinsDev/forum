@@ -7,6 +7,12 @@ use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
+    public function index()
+    {
+        $posts = Post::orderBy('id' , 'DESC')->paginate();
+        return view('posts.index' ,compact('posts'));
+    }
+    
     public function create()
     {
         return view('posts.create');
@@ -22,7 +28,7 @@ class PostController extends Controller
         $post = new Post($request->all());
         auth()->user()->posts()->save($post);
 
-        return $post->title;
+        return redirect($post->url);
     }
 
     public function show(Post $post , $slug)
