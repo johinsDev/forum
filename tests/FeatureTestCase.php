@@ -26,9 +26,4 @@ class FeatureTestCase extends TestCase
             }
         }
     }
-
-    protected function createPost(array $attributes = [])
-    {
-        return  factory(\App\Post::class)->create($attributes);
-    }
 }

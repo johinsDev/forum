@@ -10,6 +10,12 @@ abstract class TestCase extends Illuminate\Foundation\Testing\TestCase
     protected $baseUrl = 'http://localhost';
     
     protected $defaultUser;
+
+    protected function createPost(array $attributes = [])
+    {
+        return  factory(\App\Post::class)->create($attributes);
+    }
+    
     /**
      * Creates the application.
      *

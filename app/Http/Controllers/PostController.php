@@ -25,8 +25,7 @@ class PostController extends Controller
             'content'   => 'required'
         ]);
 
-        $post = new Post($request->all());
-        auth()->user()->posts()->save($post);
+       $post =  auth()->user()->post($request);
 
         return redirect($post->url);
     }
