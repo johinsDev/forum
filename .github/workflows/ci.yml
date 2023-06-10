@@ -1,0 +1,44 @@
+name: Deploy web
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    name: Build and Test
+    timeout-minutes: 15
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v3
+        with:
+          version: 7
+          node-version: 18
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Format
+        run: pnpm run format
+      - name: Lint
+        run: pnpm run lint
+      - name: Typecheck
+        run: pnpm run typecheck
+      - name: Pull latest changes
+        run: pnpm vercel pull --yes --token=${VERCEL_TOKEN}
+      - name: Print Environment Variable
+        run: echo $MY_ENV_VAR
+      - name: Build
+        run: pnpm vercel build
+      - name: Deploy
+        run: pnpm vercel deploy --prebuilt --token=${VERCEL_TOKEN}
