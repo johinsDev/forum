@@ -5,8 +5,29 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1685996976194,
-      "tag": "0000_premium_the_professor",
+      "when": 1686358443768,
+      "tag": "0000_kind_shinko_yamashiro",
+      "breakpoints": false
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1686699125288,
+      "tag": "0001_tired_beast",
+      "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1686699741721,
+      "tag": "0002_bitter_captain_cross",
+      "breakpoints": false
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1686700428305,
+      "tag": "0005_tough_korath",
       "breakpoints": false
     }
   ]

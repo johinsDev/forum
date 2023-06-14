@@ -1,20 +1,20 @@
+import { InferModel, relations } from 'drizzle-orm'
 import {
   integer,
   pgTable,
-  primaryKey,
+  serial,
   text,
   timestamp,
   uniqueIndex,
 } from 'drizzle-orm/pg-core'
-import { ProviderType } from 'next-auth/providers'
 
 export const users = pgTable(
   'users',
   {
-    id: text('id').primaryKey().notNull(),
+    id: serial('id').primaryKey(),
     name: text('name'),
     email: text('email').notNull(),
-    emailVerified: timestamp('emailVerified', { mode: 'date' }),
+    emailVerified: timestamp('email_verified', { mode: 'date' }),
     password: text('password'),
     username: text('username'),
     image: text('image'),
@@ -27,51 +27,27 @@ export const users = pgTable(
   }
 )
 
-export const accounts = pgTable(
-  'accounts',
-  {
-    userId: text('userId')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
-    type: text('type').$type<ProviderType>().notNull(),
-    provider: text('provider').notNull(),
-    providerAccountId: text('providerAccountId').notNull(),
-    refresh_token: text('refresh_token'),
-    access_token: text('access_token'),
-    expires_at: integer('expires_at'),
-    token_type: text('token_type'),
-    scope: text('scope'),
-    id_token: text('id_token'),
-    session_state: text('session_state'),
-  },
-  (account) => ({
-    compoundKey: primaryKey(account.provider, account.providerAccountId),
-  })
-)
+export const usersRelations = relations(users, ({ many }) => ({
+  sessions: many(sessions),
+}))
 
 export const sessions = pgTable('sessions', {
-  sessionToken: text('sessionToken').notNull().primaryKey(),
-  userId: text('userId')
+  userId: integer('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
-  expires: timestamp('expires', { mode: 'date' }).notNull(),
+  sessionToken: text('session_token').notNull().primaryKey(),
+  expired_at: timestamp('expired_at', { mode: 'date' }).notNull(),
 })
 
-export const verificationTokens = pgTable(
-  'verificationToken',
-  {
-    identifier: text('identifier').notNull(),
-    token: text('token').notNull(),
-    expires: timestamp('expires', { mode: 'date' }).notNull(),
-  },
-  (vt) => ({
-    compoundKey: primaryKey(vt.identifier, vt.token),
-  })
-)
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users),
+}))
+
+export type Session = InferModel<typeof sessions>
+
+export type User = InferModel<typeof users>
 
 export type Schema = {
   users: typeof users
-  accounts: typeof accounts
   sessions: typeof sessions
-  verificationTokens: typeof verificationTokens
 }
