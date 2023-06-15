@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/components/ui/use-toast'
 import { cn } from '@/lib/css'
-import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -22,29 +21,6 @@ export const LoginForm = () => {
     e.preventDefault()
 
     const data = Object.fromEntries(new FormData(e.currentTarget))
-
-    signIn('credentials', {
-      email: data.email,
-      password: data.password,
-      redirect: false,
-    }).then((res) => {
-      setIsLoading(false)
-
-      if (res?.error) {
-        toast({
-          title: 'Error',
-          description: 'Unable to login.',
-          variant: 'destructive',
-        })
-      } else {
-        toast({
-          title: 'Success',
-          description: 'You are now logged in.',
-        })
-
-        push('/dashboard')
-      }
-    })
   }
 
   return (

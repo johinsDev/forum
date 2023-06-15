@@ -1,8 +1,14 @@
-import { sessionGuard } from '@/lib/auth'
+import { auth } from '@/lib/auth'
+import { redirect } from 'next/navigation'
 
 async function login() {
   'use server'
-  await sessionGuard.loginViaId(1)
+  // proptect rate limit
+  // protect zod
+  // protect csrf
+  await auth.loginViaId(1)
+
+  redirect('/dashboard')
 }
 export default async function HomePage() {
   return (

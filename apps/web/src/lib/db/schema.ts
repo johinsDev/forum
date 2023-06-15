@@ -32,6 +32,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 }))
 
 export const sessions = pgTable('sessions', {
+  id: serial('id').primaryKey(),
   userId: integer('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
@@ -40,7 +41,10 @@ export const sessions = pgTable('sessions', {
 })
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
-  user: one(users),
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+  }),
 }))
 
 export type Session = InferModel<typeof sessions>

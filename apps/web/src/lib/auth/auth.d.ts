@@ -40,5 +40,17 @@ declare module 'Auth' {
      * Login a user without any verification
      */
     login(user: ProviderUserContract, ...args: any[]): Promise<any>
+
+    /**
+     * Attempts to authenticate the user for the current HTTP request. An exception
+     * is raised when unable to do so
+     */
+    authenticate(): Promise<ProviderUserContract>
+
+    /**
+     * Attempts to authenticate the user for the current HTTP request and supresses
+     * exceptions raised by the [[authenticate]] method and returns a boolean
+     */
+    check(): Promise<boolean>
   }
 }

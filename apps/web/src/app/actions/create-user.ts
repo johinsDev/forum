@@ -6,7 +6,6 @@ import bcrypt from 'bcrypt'
 import { eq } from 'drizzle-orm'
 import { redirect } from 'next/navigation'
 import 'server-only'
-import { v4 } from 'uuid'
 import { z } from 'zod'
 
 export const createUserSchema = z
@@ -73,7 +72,6 @@ class CreateUserAction {
 
     await db.insert(users).values({
       email: data.email,
-      id: v4(),
       name: data.name,
       password: hashedPassword,
       username: data.username,

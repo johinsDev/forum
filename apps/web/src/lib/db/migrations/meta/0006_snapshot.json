@@ -1,13 +1,19 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "d9af60fa-eea6-4e02-ae30-eb4485cf4761",
-  "prevId": "173d46b4-1f39-4cc9-8814-954d25339acd",
+  "id": "3f9b0f54-2b2d-4252-a29a-515329f9418d",
+  "prevId": "79ab1b54-b7e8-4cb6-a389-e32a22f145d5",
   "tables": {
     "sessions": {
       "name": "sessions",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
         "user_id": {
           "name": "user_id",
           "type": "integer",
@@ -20,9 +26,9 @@
           "primaryKey": true,
           "notNull": true
         },
-        "expires": {
-          "name": "expires",
-          "type": "integer",
+        "expired_at": {
+          "name": "expired_at",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": true
         }
@@ -109,8 +115,6 @@
   "_meta": {
     "schemas": {},
     "tables": {},
-    "columns": {
-      "\"sessions\".\"sessionToken\"": "\"sessions\".\"session_token\""
-    }
+    "columns": {}
   }
 }

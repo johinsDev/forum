@@ -29,6 +29,13 @@
       "when": 1686700428305,
       "tag": "0005_tough_korath",
       "breakpoints": false
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1686791694805,
+      "tag": "0006_new_amazoness",
+      "breakpoints": false
     }
   ]
 }
