@@ -1,6 +1,7 @@
 import { Toaster } from '@/components/ui/toaster'
-import { figtree } from '@/lib/fonts'
+import { inter } from '@/lib/fonts'
 import { Metadata } from 'next'
+import Navbar from './components/navbar'
 import './home.css'
 
 export const metadata: Metadata = {
@@ -27,12 +28,14 @@ interface RootLayoutProps {
 export default async function RootLayout({ children }: RootLayoutProps) {
   return (
     <>
-      <html lang="en" className={`${figtree.variable}`}>
+      <html lang="en" className={`${inter.variable}`}>
         <head></head>
         <body
           suppressHydrationWarning={true}
-          className="flex min-h-screen flex-col items-center bg-gray-100 pt-6 sm:justify-center sm:pt-0"
+          className="flex min-h-screen flex-col items-center bg-gray-100 pt-6 antialiased sm:justify-center sm:pt-0"
         >
+          <Navbar />
+
           {children}
           <Toaster />
         </body>

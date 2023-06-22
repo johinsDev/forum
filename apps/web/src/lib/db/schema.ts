@@ -1,57 +1,81 @@
-import { InferModel, relations } from 'drizzle-orm'
+import { InferModel } from 'drizzle-orm'
 import {
   integer,
   pgTable,
-  serial,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
 } from 'drizzle-orm/pg-core'
+import { AdapterAccount } from 'next-auth/adapters'
 
 export const users = pgTable(
   'users',
   {
-    id: serial('id').primaryKey(),
+    id: text('id').notNull().primaryKey(),
     name: text('name'),
     email: text('email').notNull(),
-    emailVerified: timestamp('email_verified', { mode: 'date' }),
-    password: text('password'),
     username: text('username'),
+    emailVerified: timestamp('emailVerified', { mode: 'date' }),
     image: text('image'),
   },
-  (user) => {
+  (users) => {
     return {
-      usernameIndex: uniqueIndex('users_username_index').on(user.username),
-      emailIndex: uniqueIndex('users_email_index').on(user.email),
+      usernameIdx: uniqueIndex('username_idx').on(users.username),
     }
   }
 )
 
-export const usersRelations = relations(users, ({ many }) => ({
-  sessions: many(sessions),
-}))
+export const accounts = pgTable(
+  'accounts',
+  {
+    userId: text('userId')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    type: text('type').$type<AdapterAccount['type']>().notNull(),
+    provider: text('provider').notNull(),
+    providerAccountId: text('providerAccountId').notNull(),
+    refresh_token: text('refresh_token'),
+    access_token: text('access_token'),
+    expires_at: integer('expires_at'),
+    token_type: text('token_type'),
+    scope: text('scope'),
+    id_token: text('id_token'),
+    session_state: text('session_state'),
+  },
+  (account) => ({
+    compoundKey: primaryKey(account.provider, account.providerAccountId),
+  })
+)
 
 export const sessions = pgTable('sessions', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id')
+  sessionToken: text('sessionToken').notNull().primaryKey(),
+  userId: text('userId')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
-  sessionToken: text('session_token').notNull().primaryKey(),
-  expired_at: timestamp('expired_at', { mode: 'date' }).notNull(),
+  expires: timestamp('expires', { mode: 'date' }).notNull(),
 })
 
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-  user: one(users, {
-    fields: [sessions.userId],
-    references: [users.id],
-  }),
-}))
+export const verificationTokens = pgTable(
+  'verificationToken',
+  {
+    identifier: text('identifier').notNull(),
+    token: text('token').notNull(),
+    expires: timestamp('expires', { mode: 'date' }).notNull(),
+  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier, vt.token),
+  })
+)
 
 export type Session = InferModel<typeof sessions>
 
 export type User = InferModel<typeof users>
 
-export type Schema = {
-  users: typeof users
-  sessions: typeof sessions
-}
+export type Account = InferModel<typeof accounts>
+
+export type VerificationToken = InferModel<typeof verificationTokens>
+
+export const schema = { users, accounts, sessions, verificationTokens }
+
+export type Schema = typeof schema

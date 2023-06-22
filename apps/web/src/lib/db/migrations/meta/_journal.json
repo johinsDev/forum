@@ -5,36 +5,15 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1686358443768,
-      "tag": "0000_kind_shinko_yamashiro",
+      "when": 1687392773213,
+      "tag": "0000_wandering_lockheed",
       "breakpoints": false
     },
     {
       "idx": 1,
       "version": "5",
-      "when": 1686699125288,
-      "tag": "0001_tired_beast",
-      "breakpoints": false
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1686699741721,
-      "tag": "0002_bitter_captain_cross",
-      "breakpoints": false
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1686700428305,
-      "tag": "0005_tough_korath",
-      "breakpoints": false
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1686791694805,
-      "tag": "0006_new_amazoness",
+      "when": 1687398819349,
+      "tag": "0001_awesome_black_queen",
       "breakpoints": false
     }
   ]

@@ -1,7 +1,7 @@
-import { Figtree } from 'next/font/google'
+import { Inter } from 'next/font/google'
 
-export const figtree = Figtree({
+export const inter = Inter({
   weight: ['400', '500', '600'],
   subsets: ['latin'],
-  variable: '--font-figtree',
+  variable: '--font-inter',
 })
