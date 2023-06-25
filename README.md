@@ -173,3 +173,8 @@ update-rate-limitting
 csrf
 setup trpc
 env t3
+
+- ui
+- delete account
+- update email, username, name
+- verify email flow

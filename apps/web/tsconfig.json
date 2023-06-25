@@ -18,7 +18,8 @@
     "strict": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@ui/*": ["./src/ui/*"]
+      "@components/*": ["./src/components/*"],
+      "@lib/*": ["./src/lib/*"]
     },
     "plugins": [
       {

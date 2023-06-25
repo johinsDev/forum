@@ -2,7 +2,7 @@ import { Toaster } from '@/components/ui/toaster'
 import { inter } from '@/lib/fonts'
 import { Metadata } from 'next'
 import Navbar from './components/navbar'
-import './home.css'
+import './globals.css'
 
 export const metadata: Metadata = {
   title: {
@@ -32,11 +32,13 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         <head></head>
         <body
           suppressHydrationWarning={true}
-          className="flex min-h-screen flex-col items-center bg-gray-100 pt-6 antialiased sm:justify-center sm:pt-0"
+          className="flex min-h-screen flex-col bg-gray-100"
         >
           <Navbar />
 
-          {children}
+          <main className="container flex max-w-7xl flex-1 flex-col px-4 sm:px-6 lg:px-8">
+            {children}
+          </main>
           <Toaster />
         </body>
       </html>

@@ -68,3 +68,15 @@ export const authOptions: NextAuthOptions = {
 }
 
 export const getAuthSession = () => getServerSession(authOptions)
+
+export const getUser = async () => (await getAuthSession())?.user
+
+export const getUserThrow = async () => {
+  const user = await getUser()
+
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  return user
+}

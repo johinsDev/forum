@@ -1,5 +1,5 @@
 {
-  "name": "cruisebound",
+  "name": "forum",
   "version": "0.0.0",
   "private": true,
   "workspaces": [
@@ -24,6 +24,5 @@
   "dependencies": {
     "husky": "^8.0.3",
     "prettier": "^2.8.8"
-  },
-  "packageManager": "pnpm@7.25.0"
+  }
 }
