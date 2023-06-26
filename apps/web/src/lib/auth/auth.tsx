@@ -1,3 +1,4 @@
+import MagicLinkEmail from '@/emails/magic-link'
 import { db } from '@/lib/db'
 import { eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
@@ -5,6 +6,7 @@ import { NextAuthOptions, SessionStrategy, getServerSession } from 'next-auth'
 import EmailProvider from 'next-auth/providers/email'
 import GoogleProvider from 'next-auth/providers/google'
 import { schema, users } from '../db/schema'
+import { mail } from '../mail/mail'
 import { pgDrizzleAdapter } from './drizzle-pg-adapter'
 
 const strategy: SessionStrategy = 'database'
@@ -19,15 +21,15 @@ export const authOptions: NextAuthOptions = {
   },
   providers: [
     EmailProvider({
-      server: {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: process.env.EMAIL_SERVER_PORT,
-        auth: {
-          user: process.env.EMAIL_SERVER_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD,
-        },
+      sendVerificationRequest(params) {
+        mail.send((message) => {
+          message
+            .from(process.env.EMAIL_FROM!)
+            .to(params.identifier)
+            .subject('Sign in link')
+            .react(<MagicLinkEmail url={params.url} />)
+        })
       },
-      from: process.env.EMAIL_FROM,
     }),
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,

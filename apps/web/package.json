@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "migrations:generate": "drizzle-kit generate:pg",
     "migrations:push": "node -r esbuild-register src/lib/db/migrate.ts",
-    "migrations:drop": "drizzle-kit drop --config=drizzle.config.ts"
+    "migrations:drop": "drizzle-kit drop --config=drizzle.config.ts",
+    "dev:email": "email dev"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
@@ -46,6 +47,8 @@
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-toast": "^1.1.4",
+    "@react-email/components": "^0.0.7",
+    "@react-email/tailwind": "0.0.8",
     "class-variance-authority": "^0.6.0",
     "clsx": "^1.2.1",
     "dayjs": "^1.11.8",
@@ -58,11 +61,12 @@
     "nanoid": "^4.0.2",
     "next": "^13.4.7",
     "next-auth": "^4.22.1",
-    "nodemailer": "^6.9.3",
     "pg": "^8.11.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-email": "1.9.4",
     "react-hook-form": "^7.45.0",
+    "resend": "^0.15.3",
     "server-only": "^0.0.1",
     "tailwind-merge": "^1.13.2",
     "tailwindcss-animate": "^1.0.6",
