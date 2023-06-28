@@ -1,24 +1,32 @@
 import { Toaster } from '@/components/ui/toaster'
 import { inter } from '@/lib/fonts'
 import { Metadata } from 'next'
+import { headers } from 'next/headers'
 import Navbar from './components/navbar'
 import './globals.css'
 
-export const metadata: Metadata = {
-  title: {
-    default: 'Forum',
-    template: `%s - Forum`,
-  },
-  description: 'Forum clone',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' },
-  ],
-  icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon-16x16.png',
-    apple: '/apple-touch-icon.png',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const csrfToken = headers().get('X-CSRF-Token') || 'missing'
+
+  return {
+    other: {
+      'x-csrf-token': csrfToken,
+    },
+    title: {
+      default: 'Forum',
+      template: `%s - Forum`,
+    },
+    description: 'Forum clone',
+    themeColor: [
+      { media: '(prefers-color-scheme: light)', color: 'white' },
+      { media: '(prefers-color-scheme: dark)', color: 'black' },
+    ],
+    icons: {
+      icon: '/favicon.ico',
+      shortcut: '/favicon-16x16.png',
+      apple: '/apple-touch-icon.png',
+    },
+  }
 }
 
 interface RootLayoutProps {

@@ -10,10 +10,12 @@ export const ratelimit = new Ratelimit({
   prefix: '@upstash/ratelimit',
 })
 
-export const limiter = async () => {
+export const limiter = async (path?: string) => {
   const ip = headers().get('x-forwarded-for') ?? ''
 
-  const { success, reset } = await ratelimit.limit(`ratelimit_middleware_${ip}`)
+  const { success, reset } = await ratelimit.limit(
+    `ratelimit_middleware_${path ?? ''}__${ip}`
+  )
 
   if (!success) {
     throw new Error(`Rate limit exceeded. Try again ${to(new Date(reset))}.`)

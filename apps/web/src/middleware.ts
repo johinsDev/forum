@@ -3,14 +3,15 @@ import {
   type NextFetchEvent,
   type NextRequest,
 } from 'next/server'
+import { csrfProtect } from './lib/csrf'
 
 export default async function middleware(
   request: NextRequest,
   event: NextFetchEvent
 ): Promise<Response | undefined> {
-  return NextResponse.next()
-}
+  const response = NextResponse.next()
 
-export const config = {
-  matcher: '/',
+  await csrfProtect(request, response)
+
+  return response
 }

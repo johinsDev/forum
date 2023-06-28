@@ -1,5 +1,6 @@
 'use client'
 
+import CsrfInput from '@/components/csrf-input'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -11,6 +12,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
+import { formatErrors } from '@/utils/format-error'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Session } from 'next-auth'
 import { FC, useTransition } from 'react'
@@ -41,23 +43,14 @@ const ProfileForm: FC<ProfileFormProps> = ({ user }) => {
       try {
         const res = await updateProfile(values)
 
-        if (res?.errors) {
-          res.errors.forEach((error) => {
-            form.setError(error.field as keyof profileValues, {
-              type: 'manual',
-              message: error.message,
-            })
-          })
-
-          throw new Error('Validation error')
-        }
+        formatErrors<profileValues>(res?.error, form.setError)
 
         toast({
           title: 'Success',
           description: 'Your profile has been updated.',
         })
-      } catch (error) {
-        const e = error as Error
+      } catch (ex) {
+        const e = ex as Error
 
         toast({
           title: 'Error signing up',
@@ -71,6 +64,7 @@ const ProfileForm: FC<ProfileFormProps> = ({ user }) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <CsrfInput form={form} />
         <FormField
           control={form.control}
           name="username"
