@@ -2,6 +2,7 @@ import MagicLinkEmail from '@/emails/magic-link'
 import { db } from '@/lib/db'
 import { eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
+import { GetServerSidePropsContext } from 'next'
 import { NextAuthOptions, SessionStrategy, getServerSession } from 'next-auth'
 import EmailProvider from 'next-auth/providers/email'
 import GoogleProvider from 'next-auth/providers/google'
@@ -81,4 +82,11 @@ export const getUserThrow = async () => {
   }
 
   return user
+}
+
+export const getServerAuthSession = (ctx: {
+  req: GetServerSidePropsContext['req']
+  res: GetServerSidePropsContext['res']
+}) => {
+  return getServerSession(ctx.req, ctx.res, authOptions)
 }

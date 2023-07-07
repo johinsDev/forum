@@ -22,7 +22,6 @@
     "node": ">=14.0.0"
   },
   "dependencies": {
-    "edge-csrf": "^1.0.4",
     "husky": "^8.0.3",
     "prettier": "^2.8.8"
   }
