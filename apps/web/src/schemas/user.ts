@@ -12,6 +12,12 @@ export const profileSchema = z.object({
   name: z.string().max(50, {
     message: 'Name is too long',
   }),
+  image: z
+    .string()
+    .max(250, {
+      message: 'Image URL is too long',
+    })
+    .nullable(),
   email: z
     .string()
     .email({

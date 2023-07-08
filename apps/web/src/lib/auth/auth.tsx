@@ -1,13 +1,13 @@
 import MagicLinkEmail from '@/emails/magic-link'
 import { db } from '@/lib/db'
 import { eq } from 'drizzle-orm'
-import { nanoid } from 'nanoid'
 import { GetServerSidePropsContext } from 'next'
 import { NextAuthOptions, SessionStrategy, getServerSession } from 'next-auth'
 import EmailProvider from 'next-auth/providers/email'
 import GoogleProvider from 'next-auth/providers/google'
 import { schema, users } from '../db/schema'
 import { mail } from '../mail/mail'
+import { getSignedUrlForGet } from '../storage/s3'
 import { pgDrizzleAdapter } from './drizzle-pg-adapter'
 
 const strategy: SessionStrategy = 'database'
@@ -47,19 +47,15 @@ export const authOptions: NextAuthOptions = {
         return session
       }
 
-      if (!dbUser.username) {
-        await db
-          .update(users)
-          .set({
-            username: nanoid(10),
-          })
-          .where(eq(users.id, dbUser.id))
-      }
+      // TODO: if user comes from google, download the image and upload it to s3
 
+      session.user.image = await getSignedUrlForGet(
+        dbUser.image,
+        session.user.image
+      )
       session.user.id = dbUser.id
       session.user.name = dbUser.name
       session.user.email = dbUser.email
-      session.user.image = dbUser.image
       session.user.username = dbUser.username
 
       return session

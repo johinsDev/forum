@@ -10,9 +10,16 @@ import { ChevronDownIcon } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import Logo from '../icons/logo'
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import DropdownLogout from './dropdown-logout'
 import { HamburgerMenu, ResponsiveNavigation } from './hamburger-menu'
 import NavLink from './nav-link'
+
+function getInitials(name: string) {
+  const [firstName = '', lastName = ''] = name.split(' ')
+
+  return `${firstName[0] ?? ''}${lastName[0] ?? ''}`
+}
 
 const Navbar = () => {
   const session = useSession()
@@ -49,8 +56,15 @@ const Navbar = () => {
 
           {isAuth && (
             <DropdownMenu>
-              <DropdownMenuTrigger className="hidden sm:block">
-                {user?.username}
+              <DropdownMenuTrigger className="hidden items-center gap-2 sm:flex">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={user.image ?? ''} alt={user?.name ?? ''} />
+                  <AvatarFallback className="uppercase">
+                    {getInitials(user?.username ?? user?.name ?? '')}
+                  </AvatarFallback>
+                </Avatar>
+
+                {user?.username ?? user.name}
 
                 <ChevronDownIcon className="ml-1 inline-block h-4 w-4" />
               </DropdownMenuTrigger>
