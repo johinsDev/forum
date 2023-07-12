@@ -8,23 +8,24 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { IMAGE_MIME_TYPE } from '@/config'
 import { useToast } from '@/hooks/use-toast'
 import { profileSchema } from '@/schemas/user'
 import { api } from '@/utils/api'
 import { isTRPCClientError, isZodError } from '@/utils/is-trpc-error'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useSession } from 'next-auth/react'
-import { FC, useCallback } from 'react'
-import { useDropzone } from 'react-dropzone'
+import { FC } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import Upload from '../upload'
 
 export type profileValues = z.infer<typeof profileSchema>
 
 const ProfileForm: FC = () => {
   const { toast } = useToast()
 
-  const { data: session } = useSession()
+  const { data: session, update } = useSession()
 
   const user = session?.user
 
@@ -34,6 +35,8 @@ const ProfileForm: FC = () => {
         title: 'Success',
         description: 'Your profile has been updated.',
       })
+
+      update()
     },
     onError(cause) {
       if (isTRPCClientError(cause)) {
@@ -69,51 +72,13 @@ const ProfileForm: FC = () => {
     },
   })
 
-  const { mutateAsync: getPutSignedUrl } =
-    api.user.getPutSignedUrl.useMutation()
-
   const onSubmit = async (values: profileValues) => {
     mutate(values)
   }
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    acceptedFiles.forEach(async (file) => {
-      try {
-        const { url, path } = await getPutSignedUrl({
-          filename: file.name,
-          filetype: file.type,
-        })
-
-        const res = await fetch(url, {
-          method: 'PUT',
-          body: file,
-        })
-
-        if (!res.ok) {
-          throw new Error('Something went wrong')
-        }
-
-        form.setValue('image', path)
-      } catch (error) {
-        console.log(error)
-      }
-    })
-  }, [])
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div {...getRootProps()}>
-          <input {...getInputProps()} />
-          {isDragActive ? (
-            <p>Drop the files here ...</p>
-          ) : (
-            <p>Drag drop some files here, or click to select files</p>
-          )}
-        </div>
-
         <FormField
           control={form.control}
           name="username"
@@ -156,6 +121,26 @@ const ProfileForm: FC = () => {
           )}
         />
 
+        <FormField
+          control={form.control}
+          name="image"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Avatar</FormLabel>
+              <FormControl>
+                <Upload
+                  multiple={false}
+                  value={field.value}
+                  onChange={field.onChange}
+                  accept={IMAGE_MIME_TYPE}
+                  maxSize={3 * 1024 ** 2}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="flex flex-col gap-4">
           <Button type="submit" loading={isLoading}>
             Save
@@ -169,33 +154,17 @@ const ProfileForm: FC = () => {
 export default ProfileForm
 
 // TODO:
-// dropzone styles
-// preview image
-// redaxios to review progress upload
-// connect dropzone field with form
 // if avatar comes from social, move to R2 storage
-
 // procedure ralimit
 // bull queue
+// trpc syubscription
 // edge-csrf if we need procedure
 // github action migrations
 // rewrite email templates with tailwind
 // nprogress
-// function md5(content: string) {
-//   return createHash('md5').update(content).digest('hex')
-
-//   // const filename =
-//   // ctx.session.user.id +
-//   // '/' +
-//   // md5(Date.now() + input.filename) +
-//   // '.' +
-//   // filetype.split('/')[1]
-// }
-
 // TWO FACTOR AUTH
 // LINK AND UNLINK ACCOUNTS
 // ACTIVATE ACCOUNTS
-// DELETE ACCOUNTS
 
 // review integration with imgix loader
 // event emitter
@@ -208,3 +177,5 @@ export default ProfileForm
 // ligihouse CI
 // commitlint\
 // algolia
+// stripte
+// improve upload component
