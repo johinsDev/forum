@@ -3,12 +3,12 @@ import {
   integer,
   pgTable,
   primaryKey,
+  serial,
   text,
   timestamp,
   uniqueIndex,
 } from 'drizzle-orm/pg-core'
 import { AdapterAccount } from 'next-auth/adapters'
-
 export const users = pgTable(
   'users',
   {
@@ -23,7 +23,7 @@ export const users = pgTable(
     return {
       usernameIdx: uniqueIndex('username_idx').on(users.username),
     }
-  }
+  },
 )
 
 export const accounts = pgTable(
@@ -45,7 +45,7 @@ export const accounts = pgTable(
   },
   (account) => ({
     compoundKey: primaryKey(account.provider, account.providerAccountId),
-  })
+  }),
 )
 
 export const sessions = pgTable('sessions', {
@@ -65,7 +65,21 @@ export const verificationTokens = pgTable(
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier, vt.token),
-  })
+  }),
+)
+
+export const topics = pgTable(
+  'topics',
+  {
+    id: serial('id').notNull().primaryKey(),
+    name: text('name').notNull(),
+    slug: text('slug').notNull(),
+    createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  },
+  (topics) => ({
+    slugIdx: uniqueIndex('slug_idx').on(topics.slug),
+  }),
 )
 
 export type Session = InferModel<typeof sessions>
@@ -74,8 +88,10 @@ export type User = InferModel<typeof users>
 
 export type Account = InferModel<typeof accounts>
 
+export type Topic = InferModel<typeof topics>
+
 export type VerificationToken = InferModel<typeof verificationTokens>
 
-export const schema = { users, accounts, sessions, verificationTokens }
+export const schema = { users, accounts, sessions, verificationTokens, topics }
 
 export type Schema = typeof schema

@@ -74,7 +74,7 @@ export const getSignedUrl = async (
   options?: ContentHeaders & {
     expiresIn?: string
     method?: 'PUT' | 'DELETE' | 'GET'
-  }
+  },
 ) => {
   const method = options?.method || 'GET'
 
@@ -90,7 +90,7 @@ export const getSignedUrl = async (
       }),
       {
         expiresIn: ms(options?.expiresIn || '15min') / 1000,
-      }
+      },
     )
   } catch (error) {
     console.error(error)
@@ -112,7 +112,7 @@ export const getSignedUrlForGet = async (
   currentUrl?: string | null,
   options?: ContentHeaders & {
     expiresIn?: string
-  }
+  },
 ) => {
   if (!path) {
     return ''
@@ -140,7 +140,7 @@ export const getSignedUrlForGet = async (
 
   // Parse the expire date to a date object and add the expires seconds
   const expireDateParsed = date(
-    Date.parse(expireDate.replace(/(....)(..)(..T..)(..)/, '$1-$2-$3:$4:'))
+    Date.parse(expireDate.replace(/(....)(..)(..T..)(..)/, '$1-$2-$3:$4:')),
   ).add(expiresSeconds, 'second')
 
   const now = date()

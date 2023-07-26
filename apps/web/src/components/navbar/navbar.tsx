@@ -58,7 +58,11 @@ const Navbar = () => {
             <DropdownMenu>
               <DropdownMenuTrigger className="hidden items-center gap-2 sm:flex">
                 <Avatar className="h-6 w-6">
-                  <AvatarImage src={user.image ?? ''} alt={user?.name ?? ''} />
+                  <AvatarImage
+                    src={user.image ?? ''}
+                    alt={user?.name ?? ''}
+                    className="object-cover"
+                  />
                   <AvatarFallback className="uppercase">
                     {getInitials(user?.username ?? user?.name ?? '')}
                   </AvatarFallback>

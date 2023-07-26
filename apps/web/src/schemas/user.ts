@@ -14,7 +14,7 @@ export const profileSchema = z.object({
   }),
   image: z
     .string()
-    .max(250, {
+    .max(500, {
       message: 'Image URL is too long',
     })
     .nullable(),

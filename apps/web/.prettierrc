@@ -3,6 +3,7 @@
   "singleQuote": true,
   "tabWidth": 2,
   "useTabs": false,
+  "endOfLine": "auto",
   "tailwindFunctions": ["clsx"],
   "plugins": ["prettier-plugin-organize-imports", "prettier-plugin-tailwindcss"]
 }

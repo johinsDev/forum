@@ -30,13 +30,13 @@ const ProfileForm: FC = () => {
   const user = session?.user
 
   const { mutate, isLoading } = api.user.updateProfile.useMutation({
-    onSuccess() {
+    onSuccess(data) {
       toast({
         title: 'Success',
         description: 'Your profile has been updated.',
       })
 
-      update()
+      update(data)
     },
     onError(cause) {
       if (isTRPCClientError(cause)) {
@@ -50,7 +50,7 @@ const ProfileForm: FC = () => {
                 message,
               })
             }
-          }
+          },
         )
       }
 
@@ -141,11 +141,9 @@ const ProfileForm: FC = () => {
           )}
         />
 
-        <div className="flex flex-col gap-4">
-          <Button type="submit" loading={isLoading}>
-            Save
-          </Button>
-        </div>
+        <Button type="submit" loading={isLoading} className="w-24">
+          Save
+        </Button>
       </form>
     </Form>
   )
@@ -165,7 +163,7 @@ export default ProfileForm
 // TWO FACTOR AUTH
 // LINK AND UNLINK ACCOUNTS
 // ACTIVATE ACCOUNTS
-
+// error login/register review next-auth cuistom pages
 // review integration with imgix loader
 // event emitter
 // next-translations

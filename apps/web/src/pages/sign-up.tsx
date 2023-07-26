@@ -19,7 +19,7 @@ const SignUpPage: FC<SignUpPageProps> = ({}) => {
       <div className="mt-6 text-center text-sm text-gray-600">
         Already have an account?{' '}
         <Link
-          className="hover:text-brand text-primary font-semibold"
+          className="hover:text-brand font-semibold text-primary"
           href="/sign-in"
         >
           Sign In

@@ -16,13 +16,14 @@
   },
   "devDependencies": {
     "husky": "^8.0.3",
-    "turbo": "^1.10.1"
+    "turbo": "^1.10.12"
   },
   "engines": {
     "node": ">=14.0.0"
   },
   "dependencies": {
+    "@smithy/hash-stream-node": "^2.0.1",
     "husky": "^8.0.3",
-    "prettier": "^2.8.8"
+    "prettier": "^3.0.0"
   }
 }

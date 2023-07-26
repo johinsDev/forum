@@ -1,4 +1,7 @@
+const colors = require('tailwindcss/colors')
+
 /** @type {import('tailwindcss').Config} */
+
 module.exports = {
   darkMode: ['class'],
   content: [
@@ -16,6 +19,16 @@ module.exports = {
       },
     },
     extend: {
+      colors: {
+        primary: {
+          DEFAULT: colors.indigo[600],
+          ...colors.indigo,
+        },
+        secondary: {
+          DEFAULT: colors.lime[600],
+          ...colors.lime,
+        },
+      },
       keyframes: {
         'accordion-down': {
           from: { height: 0 },

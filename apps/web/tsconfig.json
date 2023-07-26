@@ -2,7 +2,7 @@
   "compilerOptions": {
     "strict": true,
     "experimentalDecorators": true,
-    "target": "es5",
+    "target": "es6",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -20,7 +20,9 @@
     "paths": {
       "@/*": ["./src/*"],
       "@components/*": ["./src/components/*"],
-      "@lib/*": ["./src/lib/*"]
+      "@lib/*": ["./src/lib/*"],
+      "@ui/*": ["./src/components/ui/*"],
+      "@skeleton/*": ["./src/components/ui/skeleton/*"]
     },
     "plugins": [
       {

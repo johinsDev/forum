@@ -51,7 +51,7 @@ export const authOptions: NextAuthOptions = {
 
       session.user.image = await getSignedUrlForGet(
         dbUser.image,
-        session.user.image
+        session.user.image,
       )
       session.user.id = dbUser.id
       session.user.name = dbUser.name

@@ -1,11 +1,32 @@
-import ProfileForm from '@/components/profile/profile-form'
-import { getServerAuthSession } from '@/lib/auth/auth'
-import { GetServerSideProps } from 'next'
-import { FC } from 'react'
+import { ProfileFormSkeleton } from '@/components/profile/profile-form-skeleton'
+import { FCAuth } from '@/types/herper'
+import SkeletonButton from '@skeleton/skeleton-button'
+import dynamic from 'next/dynamic'
+import React from 'react'
+
+const ProfileForm = dynamic(() => import('@/components/profile/profile-form'), {
+  loading() {
+    return <ProfileFormSkeleton />
+  },
+})
+
+const DeleteAccount = dynamic(
+  () => import('@/components/profile/delete-account'),
+  {
+    loading() {
+      return <ProfileFormSkeleton />
+    },
+  },
+)
 
 interface ProfilePageProps {}
 
-const ProfilePage: FC<ProfilePageProps> = ({}) => {
+interface LayoutProps {
+  profile: React.ReactNode
+  deleteAccount?: React.ReactNode
+}
+
+const Layout = ({ deleteAccount, profile }: LayoutProps) => {
   return (
     <section className="mt-6">
       <h2 className="text-xl font-semibold leading-tight text-gray-800">
@@ -25,13 +46,25 @@ const ProfilePage: FC<ProfilePageProps> = ({}) => {
               </p>
             </header>
 
-            <div className="mt-6 space-y-6">
-              <ProfileForm />
-            </div>
+            <div className="mt-6 space-y-6">{profile}</div>
           </div>
 
           <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8">
-            delete form
+            <section className="space-y-6">
+              <header>
+                <h2 className="text-lg font-medium text-gray-900">
+                  Delete Account
+                </h2>
+
+                <p className="mt-1 text-sm text-gray-600">
+                  Once your account is deleted, all of its resources and data
+                  will be permanently deleted. Before deleting your account,
+                  please download any data or information that you wish to
+                  retain.
+                </p>
+              </header>
+              {deleteAccount}
+            </section>
           </div>
         </div>
       </div>
@@ -39,23 +72,17 @@ const ProfilePage: FC<ProfilePageProps> = ({}) => {
   )
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await getServerAuthSession(context)
+const ProfilePage: FCAuth<ProfilePageProps> = ({}) => {
+  return <Layout deleteAccount={<DeleteAccount />} profile={<ProfileForm />} />
+}
 
-  if (!session) {
-    return {
-      redirect: {
-        destination: '/sign-in',
-        permanent: false,
-      },
-    }
-  }
-
-  return {
-    props: {
-      session: await getServerAuthSession(context),
-    },
-  }
+ProfilePage.auth = {
+  loading: (
+    <Layout
+      profile={<ProfileFormSkeleton />}
+      deleteAccount={<SkeletonButton>DELETE ACCOUNT</SkeletonButton>}
+    />
+  ),
 }
 
 export default ProfilePage
