@@ -77,7 +77,7 @@ export const topics = pgTable(
   'topics',
   {
     id: serial('id').notNull().primaryKey(),
-    name: text('name').notNull(),
+    title: text('title').notNull(),
     slug: text('slug').notNull(),
     createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
     updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
@@ -101,6 +101,7 @@ export const discussions = pgTable(
     topicId: integer('topicId').references(() => topics.id),
     title: text('title').notNull(),
     slug: text('slug').notNull(),
+    pinnedAt: timestamp('pinnedAt', { mode: 'date' }),
     createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
     updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
   },

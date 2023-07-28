@@ -1,3 +1,5 @@
+import { cn } from '@/lib/css'
+import { figtree } from '@/lib/fonts'
 import '@/styles/globals.css'
 import { FCAuth } from '@/types/herper'
 import { api } from '@/utils/api'
@@ -60,19 +62,23 @@ const MyApp: AppType<{ session: Session | null }> = ({
   const C = Component as FCAuth<any>
 
   return (
-    <SessionProvider session={session}>
-      <Navbar />
-      <main className="mx-auto flex w-full max-w-7xl  flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
-        {!!C.auth ? (
-          <Auth loading={C.auth.loading}>
+    <div className={cn('flex min-h-screen flex-col', figtree.variable)}>
+      <SessionProvider session={session}>
+        <Navbar />
+        <main
+          className={`mx-auto flex w-full max-w-7xl  flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8`}
+        >
+          {!!C.auth ? (
+            <Auth loading={C.auth.loading}>
+              <Component {...pageProps} />
+            </Auth>
+          ) : (
             <Component {...pageProps} />
-          </Auth>
-        ) : (
-          <Component {...pageProps} />
-        )}
-      </main>
-      <Toaster />
-    </SessionProvider>
+          )}
+        </main>
+        <Toaster />
+      </SessionProvider>
+    </div>
   )
 }
 

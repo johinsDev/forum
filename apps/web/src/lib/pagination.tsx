@@ -1,12 +1,12 @@
 import { Table } from '@/types/drizzle-orm'
-import { sql } from 'drizzle-orm'
+import { SQL, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { DbClient } from './db'
 
 export const paginationInput = z.object({
   perPage: z
     .number()
-    .min(10)
+    .min(1)
     .max(100)
     .positive()
     .default(10)
@@ -19,9 +19,23 @@ export const paginationInput = z.object({
 export interface PaginationProps extends z.infer<typeof paginationInput> {
   db: DbClient
   table: Table
+  where?: SQL | undefined
 }
 
-export async function getParams(input: PaginationProps) {
+export interface PaginationResult {
+  perPage: number
+  page: number
+  offset: number
+  totalRows: number
+  limit: number
+  totalPages: number
+  nextPage: number
+  prevPage: number
+}
+
+export async function getParams(
+  input: PaginationProps,
+): Promise<PaginationResult> {
   let { perPage, page = 1, db, table } = input
 
   const total = await db
@@ -29,6 +43,7 @@ export async function getParams(input: PaginationProps) {
       total: sql`count(*)`,
     })
     .from(table)
+    .where(input.where)
 
   const totalRows = Number(total[0].total)
 
@@ -44,7 +59,7 @@ export async function getParams(input: PaginationProps) {
 
   const nextPage = Math.min(page + 1, totalPages)
 
-  const prevPage = Math.max(page - 1, 1)
+  const prevPage = Math.max(page - 1, 0)
 
   return {
     perPage,

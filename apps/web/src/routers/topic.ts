@@ -8,15 +8,15 @@ import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
 
 export const apiTopic = createInsertSchema(topics, {
-  name: (s) => s.name.nonempty().max(255).min(3),
+  title: (s) => s.title.nonempty().max(255).min(3),
 })
 
 export const apiCreateTopic = apiTopic.pick({
-  name: true,
+  title: true,
 })
 
 export const apiUpdateTopic = z.object({
-  name: z.string().max(255).min(3).optional(),
+  title: z.string().max(255).min(3).optional(),
   id: z.number().positive(),
 })
 
@@ -40,7 +40,7 @@ function topicSlug(name: string, db: DbClient, currentId?: number) {
 export const topicRouter = createTRPCRouter({
   all: publicProcedure.query(async ({ ctx }) => {
     return ctx.db.query.topics.findMany({
-      orderBy: (topics, { asc }) => [asc(topics.name)],
+      orderBy: (topics, { asc }) => [asc(topics.title)],
     })
   }),
   create: publicProcedure
@@ -49,8 +49,8 @@ export const topicRouter = createTRPCRouter({
       return ctx.db
         .insert(topics)
         .values({
-          name: input.name,
-          slug: await topicSlug(input.name, ctx.db),
+          title: input.title,
+          slug: await topicSlug(input.title, ctx.db),
         })
         .returning()
     }),
@@ -68,9 +68,9 @@ export const topicRouter = createTRPCRouter({
       return ctx.db
         .update(topics)
         .set({
-          name: input.name,
+          title: input.title,
           slug: await topicSlug(
-            input.name ?? currentTopic.name,
+            input.title ?? currentTopic.title,
             ctx.db,
             currentTopic.id,
           ),

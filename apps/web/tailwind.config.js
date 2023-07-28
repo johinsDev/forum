@@ -19,6 +19,9 @@ module.exports = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['var(--font-figtree)', 'sans-serif'],
+      },
       colors: {
         primary: {
           DEFAULT: colors.indigo[600],

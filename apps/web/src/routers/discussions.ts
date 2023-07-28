@@ -1,31 +1,16 @@
 import { DbClient } from '@/lib/db'
-import { discussions, topics } from '@/lib/db/schema'
+import { discussions } from '@/lib/db/schema'
 import { getParams, paginationInput } from '@/lib/pagination'
 import { slugify } from '@/lib/slug'
 import { createTRPCRouter, publicProcedure } from '@/lib/trpc/trpc'
-import { createInsertSchema } from 'drizzle-zod'
+import { SQL, eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
 
-export const apiTopic = createInsertSchema(topics, {
-  name: (s) => s.name.nonempty().max(255).min(3),
-})
-
-export const apiCreateTopic = apiTopic.pick({
-  name: true,
-})
-
-export const apiUpdateTopic = z.object({
-  name: z.string().max(255).min(3).optional(),
-  id: z.number().positive(),
-})
-
-export const apiDeleteTopic = z.object({
-  id: z.number().positive(),
-})
-
-export const apiOneTopic = z.object({
-  id: z.number().positive(),
-})
+const discussionsInput = paginationInput.merge(
+  z.object({
+    topic: z.number().optional().nullable(),
+  }),
+)
 
 function discussionSlug(name: string, db: DbClient, currentId?: number) {
   return slugify(name, db, {
@@ -37,23 +22,43 @@ function discussionSlug(name: string, db: DbClient, currentId?: number) {
 }
 
 export const discussionsRouter = createTRPCRouter({
-  all: publicProcedure.input(paginationInput).query(async ({ ctx, input }) => {
+  all: publicProcedure.input(discussionsInput).query(async ({ ctx, input }) => {
+    let where: SQL | undefined
+
+    if (input.topic) {
+      where = eq(discussions.topicId, input.topic)
+    }
+
     const meta = await getParams({
       db: ctx.db,
       table: discussions,
-      ...input,
+      cursor: input.cursor,
+      page: input.page,
+      perPage: input.perPage,
+      where,
     })
 
     const rows = await ctx.db.query.discussions.findMany({
+      orderBy: (discussions, { desc }) => [
+        sql`${desc(discussions.pinnedAt)} nulls last`,
+        desc(discussions.updatedAt),
+      ],
+      where,
       with: {
-        topic: true,
+        topic: {
+          columns: {
+            id: true,
+            title: true,
+            slug: true,
+          },
+        },
       },
       columns: {
         id: true,
         title: true,
         slug: true,
+        pinnedAt: true,
       },
-      orderBy: (discussions, { asc }) => [asc(discussions.title)],
       limit: meta.limit,
       offset: meta.offset,
     })

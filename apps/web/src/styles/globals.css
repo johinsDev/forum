@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  #__next > div {
+    @apply font-sans;
+  }
+
   #__next {
     @apply flex flex-1 flex-col;
   }
