@@ -10,6 +10,13 @@ import { api } from '@/utils/api'
 const HomePage = () => {
   const { data: topics } = api.topic.all.useQuery()
 
+  const { data: discussions } = api.discussion.all.useInfiniteQuery({
+    page: 1,
+    perPage: 10,
+  })
+
+  console.log(discussions)
+
   return (
     <div className="grid-cols-7 gap-6 space-y-6 md:grid md:space-y-0">
       <div className="col-span-2 space-y-3 overflow-hidden">

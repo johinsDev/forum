@@ -1,10 +1,10 @@
 import { date } from '@/lib/date'
 import { DbClient } from '@/lib/db'
 import { topics } from '@/lib/db/schema'
+import { slugify } from '@/lib/slug'
 import { createTRPCRouter, publicProcedure } from '@/lib/trpc/trpc'
-import { and, eq, like, not, or } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { createInsertSchema } from 'drizzle-zod'
-import slugify from 'slugify'
 import { z } from 'zod'
 
 export const apiTopic = createInsertSchema(topics, {
@@ -28,39 +28,13 @@ export const apiOneTopic = z.object({
   id: z.number().positive(),
 })
 
-const SEPARATOR = '-'
-
-async function topicSlug(name: string, db: DbClient, currentId?: number) {
-  const slug = slugify(name, {
-    lower: true,
-    trim: true,
+function topicSlug(name: string, db: DbClient, currentId?: number) {
+  return slugify(name, db, {
+    currentId,
+    idColumn: topics.id,
+    slugColumn: topics.slug,
+    table: topics,
   })
-
-  const topicsSimilar = await db
-    .select({
-      slug: topics.slug,
-    })
-    .from(topics)
-    .where(
-      and(
-        not(eq(topics.id, currentId ?? -1)),
-        or(eq(topics.slug, slug), like(topics.slug, `${slug}${SEPARATOR}%`)),
-      ),
-    )
-
-  const slugs = topicsSimilar.map((topic) => topic.slug)
-
-  if (slugs.length === 0 || !slugs.includes(slug)) {
-    return slug
-  }
-
-  const len = (slug + SEPARATOR).length
-
-  const max = Math.max(...slugs.map((slug) => Number(slug.slice(len))))
-
-  const suffix = max + 1
-
-  return `${slug}${SEPARATOR}${suffix}`
 }
 
 export const topicRouter = createTRPCRouter({

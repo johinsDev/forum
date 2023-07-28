@@ -1,4 +1,4 @@
-import { InferModel } from 'drizzle-orm'
+import { InferModel, relations } from 'drizzle-orm'
 import {
   integer,
   pgTable,
@@ -9,6 +9,7 @@ import {
   uniqueIndex,
 } from 'drizzle-orm/pg-core'
 import { AdapterAccount } from 'next-auth/adapters'
+
 export const users = pgTable(
   'users',
   {
@@ -25,6 +26,10 @@ export const users = pgTable(
     }
   },
 )
+
+export const userRelations = relations(users, ({ many }) => ({
+  discussions: many(discussions),
+}))
 
 export const accounts = pgTable(
   'accounts',
@@ -82,6 +87,39 @@ export const topics = pgTable(
   }),
 )
 
+export const topicsRelations = relations(topics, ({ many }) => ({
+  discussions: many(discussions),
+}))
+
+export const discussions = pgTable(
+  'discussions',
+  {
+    id: serial('id').notNull().primaryKey(),
+    userId: text('userId').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    topicId: integer('topicId').references(() => topics.id),
+    title: text('title').notNull(),
+    slug: text('slug').notNull(),
+    createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+  },
+  (discussions) => ({
+    slugIdx: uniqueIndex('slug_idx').on(discussions.slug),
+  }),
+)
+
+export const discussionsRelations = relations(discussions, ({ one }) => ({
+  user: one(users, {
+    fields: [discussions.userId],
+    references: [users.id],
+  }),
+  topic: one(topics, {
+    fields: [discussions.topicId],
+    references: [topics.id],
+  }),
+}))
+
 export type Session = InferModel<typeof sessions>
 
 export type User = InferModel<typeof users>
@@ -92,6 +130,38 @@ export type Topic = InferModel<typeof topics>
 
 export type VerificationToken = InferModel<typeof verificationTokens>
 
-export const schema = { users, accounts, sessions, verificationTokens, topics }
+export type Discussion = InferModel<typeof discussions>
+
+export const schema = {
+  users,
+  accounts,
+  sessions,
+  verificationTokens,
+  topics,
+  discussions,
+  discussionsRelations,
+  topicsRelations,
+}
 
 export type Schema = typeof schema
+// resend
+// tw-email
+// bull
+// events
+
+// trpc-rate
+// trpc-subscription
+
+// two factor
+// link and uinlink
+// activate account
+
+// next-translate
+// next-seo
+// next-pwa
+// imgx-image
+// commitlint
+// lighthouse
+
+// github aciton
+// lazy loading dropdown navbar
