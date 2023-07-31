@@ -107,8 +107,8 @@ export function pgDrizzleAdapter(client: DbClient, schema: Schema): Adapter {
         .where(
           and(
             eq(accounts.providerAccountId, account.providerAccountId),
-            eq(accounts.provider, account.provider)
-          )
+            eq(accounts.provider, account.provider),
+          ),
         )
         .leftJoin(users, eq(accounts.userId, users.id))
         .then((res) => res[0])
@@ -135,8 +135,8 @@ export function pgDrizzleAdapter(client: DbClient, schema: Schema): Adapter {
             .where(
               and(
                 eq(verificationTokens.identifier, token.identifier),
-                eq(verificationTokens.token, token.token)
-              )
+                eq(verificationTokens.token, token.token),
+              ),
             )
             .returning()
             .then((res) => res[0]) ?? null
@@ -158,8 +158,8 @@ export function pgDrizzleAdapter(client: DbClient, schema: Schema): Adapter {
         .where(
           and(
             eq(accounts.providerAccountId, account.providerAccountId),
-            eq(accounts.provider, account.provider)
-          )
+            eq(accounts.provider, account.provider),
+          ),
         )
 
       return undefined

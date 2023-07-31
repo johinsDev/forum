@@ -12,7 +12,7 @@ import { memo } from 'react'
 const SelectTopic_ = () => {
   const { push, pathname, query } = useRouter()
 
-  const value = String(query.topic ?? 'all')
+  const value = (query.topic ?? 'all') as string
 
   const { data: topics } = api.topic.all.useQuery(undefined, {
     refetchOnWindowFocus: false,
@@ -43,7 +43,7 @@ const SelectTopic_ = () => {
       </SelectTrigger>
       <SelectContent>
         {topics?.map((topic) => (
-          <SelectItem key={topic.id} value={topic.id.toString()}>
+          <SelectItem key={topic.id} value={topic.slug}>
             {topic.title}
           </SelectItem>
         ))}

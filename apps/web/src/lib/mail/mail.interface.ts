@@ -8,7 +8,7 @@ interface Attachment {
 }
 
 export type MessageComposeCallback = (
-  message: MessageContract
+  message: MessageContract,
 ) => void | Promise<void>
 
 export interface MessageContract {

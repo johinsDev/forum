@@ -1,5 +1,6 @@
 import { InferModel, relations } from 'drizzle-orm'
 import {
+  AnyPgColumn,
   integer,
   pgTable,
   primaryKey,
@@ -29,6 +30,7 @@ export const users = pgTable(
 
 export const userRelations = relations(users, ({ many }) => ({
   discussions: many(discussions),
+  posts: many(posts),
 }))
 
 export const accounts = pgTable(
@@ -110,7 +112,7 @@ export const discussions = pgTable(
   }),
 )
 
-export const discussionsRelations = relations(discussions, ({ one }) => ({
+export const discussionsRelations = relations(discussions, ({ one, many }) => ({
   user: one(users, {
     fields: [discussions.userId],
     references: [users.id],
@@ -118,6 +120,36 @@ export const discussionsRelations = relations(discussions, ({ one }) => ({
   topic: one(topics, {
     fields: [discussions.topicId],
     references: [topics.id],
+  }),
+  posts: many(posts),
+}))
+
+export const posts = pgTable('posts', {
+  id: serial('id').notNull().primaryKey(),
+  userId: text('userId').references(() => users.id, {
+    onDelete: 'set null',
+  }),
+  discussionId: integer('discussionId').references(() => discussions.id, {
+    onDelete: 'cascade',
+  }),
+  parentId: integer('parentId').references((): AnyPgColumn => posts.id),
+  body: text('body'),
+  createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
+})
+
+export const postsRelations = relations(posts, ({ one }) => ({
+  user: one(users, {
+    fields: [posts.userId],
+    references: [users.id],
+  }),
+  discussion: one(discussions, {
+    fields: [posts.discussionId],
+    references: [discussions.id],
+  }),
+  reply: one(posts, {
+    fields: [posts.parentId],
+    references: [posts.id],
   }),
 }))
 
@@ -131,17 +163,22 @@ export type Topic = InferModel<typeof topics>
 
 export type VerificationToken = InferModel<typeof verificationTokens>
 
+export type Post = InferModel<typeof posts>
+
 export type Discussion = InferModel<typeof discussions>
 
 export const schema = {
   users,
+  userRelations,
   accounts,
   sessions,
   verificationTokens,
   topics,
+  topicsRelations,
   discussions,
   discussionsRelations,
-  topicsRelations,
+  posts,
+  postsRelations,
 }
 
 export type Schema = typeof schema

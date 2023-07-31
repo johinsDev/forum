@@ -7,7 +7,7 @@ import { csrfProtect } from './lib/csrf'
 
 export default async function middleware(
   request: NextRequest,
-  event: NextFetchEvent
+  event: NextFetchEvent,
 ): Promise<Response | undefined> {
   const response = NextResponse.next()
 

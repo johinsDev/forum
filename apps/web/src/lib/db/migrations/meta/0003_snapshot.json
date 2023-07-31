@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "2fa6b296-a2cb-495c-bee9-e57a419799b4",
-  "prevId": "364fc460-ce93-4efe-b499-bf429ac35b7f",
+  "id": "1ba3b422-ab2d-426b-9bec-872e5e3dd445",
+  "prevId": "79b7c25f-9f1f-461b-aaba-0e61d863b547",
   "tables": {
     "accounts": {
       "name": "accounts",
@@ -129,6 +129,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "pinnedAt": {
+          "name": "pinnedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "timestamp",
@@ -166,6 +172,88 @@
           "tableFrom": "discussions",
           "tableTo": "topics",
           "columnsFrom": ["topicId"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "posts": {
+      "name": "posts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "discussionId": {
+          "name": "discussionId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentId": {
+          "name": "parentId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "body": {
+          "name": "body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "posts_userId_users_id_fk": {
+          "name": "posts_userId_users_id_fk",
+          "tableFrom": "posts",
+          "tableTo": "users",
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "posts_discussionId_discussions_id_fk": {
+          "name": "posts_discussionId_discussions_id_fk",
+          "tableFrom": "posts",
+          "tableTo": "discussions",
+          "columnsFrom": ["discussionId"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "posts_parentId_posts_id_fk": {
+          "name": "posts_parentId_posts_id_fk",
+          "tableFrom": "posts",
+          "tableTo": "posts",
+          "columnsFrom": ["parentId"],
           "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -351,8 +439,6 @@
   "_meta": {
     "schemas": {},
     "tables": {},
-    "columns": {
-      "\"topics\".\"name\"": "\"topics\".\"title\""
-    }
+    "columns": {}
   }
 }

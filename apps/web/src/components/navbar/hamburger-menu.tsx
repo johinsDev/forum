@@ -17,7 +17,7 @@ export const ResponsiveNavigation: FC<ResponsiveNavigationProps> = ({
   session,
 }) => {
   const [showingNavigationDropdown, setShowingNavigationDropdown] = useAtom(
-    showingNavigationDropdownAtom
+    showingNavigationDropdownAtom,
   )
 
   const closeNavigationDropdown = () => {
@@ -81,7 +81,7 @@ export const ResponsiveNavigation: FC<ResponsiveNavigationProps> = ({
 
 export const HamburgerMenu: FC<HamburgerMenuProps> = ({}) => {
   const [showingNavigationDropdown, setShowingNavigationDropdown] = useAtom(
-    showingNavigationDropdownAtom
+    showingNavigationDropdownAtom,
   )
 
   return (

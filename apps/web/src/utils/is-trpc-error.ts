@@ -2,7 +2,7 @@ import { AppRouter } from '@/lib/trpc/root'
 import { TRPCClientError } from '@trpc/client'
 
 export function isTRPCClientError(
-  cause: unknown
+  cause: unknown,
 ): cause is TRPCClientError<AppRouter> {
   return cause instanceof TRPCClientError
 }

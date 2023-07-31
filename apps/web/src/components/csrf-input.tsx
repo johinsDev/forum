@@ -10,7 +10,7 @@ interface CsrfInputProps {
 const CsrfInput: FC<CsrfInputProps> = ({ form }) => {
   useEffect(() => {
     const el = document.querySelector(
-      'meta[name="x-csrf-token"]'
+      'meta[name="x-csrf-token"]',
     ) as HTMLMetaElement | null
 
     if (el) form.setValue('csrfToken', el.content)

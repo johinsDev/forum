@@ -34,7 +34,7 @@ export const ResponsiveNavLink: FC<ResponsiveNavLinkProps> = ({
             isActive,
           'border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 focus:border-gray-300 focus:bg-gray-50 focus:text-gray-800':
             !isActive,
-        }
+        },
       )}
       {...props}
     >
@@ -64,7 +64,7 @@ export const NavLink: FC<NavLinkProps> = ({
             isActive,
           'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700  focus:border-gray-300 focus:text-gray-700':
             !isActive,
-        }
+        },
       )}
       {...props}
     >

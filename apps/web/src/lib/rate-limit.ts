@@ -14,7 +14,7 @@ export const limiter = async (path?: string) => {
   const ip = headers().get('x-forwarded-for') ?? ''
 
   const { success, reset } = await ratelimit.limit(
-    `ratelimit_middleware_${path ?? ''}__${ip}`
+    `ratelimit_middleware_${path ?? ''}__${ip}`,
   )
 
   if (!success) {

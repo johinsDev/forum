@@ -6,7 +6,7 @@ dayjs.extend(relativeTime)
 export const to = (
   compared: ConfigType,
   date?: ConfigType,
-  withoutSuffix?: boolean
+  withoutSuffix?: boolean,
 ) => dayjs(date).to(compared, withoutSuffix)
 
 export const toDate = (date?: ConfigType) => dayjs(date).toDate()

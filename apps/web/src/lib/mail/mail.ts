@@ -27,5 +27,5 @@ class Mailer {
 }
 
 export const mail = new Mailer().use(
-  new ResendDriver(process.env.RENSEND_API_KEY!)
+  new ResendDriver(process.env.RENSEND_API_KEY!),
 )

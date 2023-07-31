@@ -79,7 +79,7 @@ export class Message implements MessageContract {
   attach(
     content: string | Buffer,
     filename?: string | undefined,
-    path?: string | undefined
+    path?: string | undefined,
   ): this {
     this.messageNode.attachments = Array.isArray(this.messageNode.attachments)
       ? this.messageNode.attachments
