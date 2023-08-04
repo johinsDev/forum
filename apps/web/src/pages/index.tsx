@@ -9,11 +9,10 @@ import { useRouter } from 'next/router'
 const HomePage = () => {
   const { query } = useRouter()
 
-  const topic = query.topic as string | undefined
-
   const { data, isLoading } = api.discussion.all.useQuery({
+    ...query,
     page: query.page ? Number(query.page) : 1,
-    topic,
+    perPage: query.perPage ? Number(query.perPage) : 10,
   })
 
   const discussions = data?.data ?? []

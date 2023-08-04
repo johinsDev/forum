@@ -1,49 +1,153 @@
-import { DbClient } from '@/lib/db'
 import { discussions, posts, topics, users } from '@/lib/db/schema'
 import { getMeta, paginationInput } from '@/lib/pagination'
-import { slugify } from '@/lib/slug'
-import { createTRPCRouter, publicProcedure } from '@/lib/trpc/trpc'
+import {
+  createInnerTRPCContext,
+  createTRPCRouter,
+  publicProcedure,
+} from '@/lib/trpc/trpc'
 import { TRPCError } from '@trpc/server'
-import { SQL, asc, desc, eq, isNull, not, sql } from 'drizzle-orm'
+import { SQL, and, asc, desc, eq, isNull, not, sql } from 'drizzle-orm'
 import { z } from 'zod'
 
 const discussionsInput = paginationInput.merge(
   z.object({
     topic: z.string().optional().nullable(),
+    no_replies: z.enum(['true', 'false']).optional().nullable(),
+    my_discussions: z.enum(['true', 'false']).optional().nullable(),
+    participating: z.enum(['true', 'false']).optional().nullable(),
   }),
 )
 
-function discussionSlug(name: string, db: DbClient, currentId?: number) {
-  return slugify(name, db, {
-    currentId,
-    idColumn: discussions.id,
-    slugColumn: discussions.slug,
-    table: discussions,
-  })
-}
+function getQueryDiscussion(
+  ctx: ReturnType<typeof createInnerTRPCContext>,
+  input?: z.infer<typeof discussionsInput>,
+) {
+  const noReply = input?.no_replies === 'true'
 
-const SELECT_DISCUSSION = {
-  id: discussions.id,
-  title: discussions.title,
-  slug: discussions.slug,
-  pinnedAt: discussions.pinnedAt,
-  topic: {
-    id: topics.id,
-    title: topics.title,
-    slug: topics.slug,
-  },
+  const db = ctx.db
+
+  let where: SQL | undefined
+
+  const lastPost = db
+    .selectDistinctOn([posts.discussionId], {
+      username: users.username,
+      discussionId: posts.discussionId,
+      updatedAt: posts.updatedAt,
+    })
+    .from(posts)
+    .leftJoin(users, eq(posts.userId, users.id))
+    .orderBy(() => [desc(posts.discussionId), desc(posts.updatedAt)])
+    .as('lastUserPost')
+
+  const firstPost = db
+    .selectDistinctOn([posts.discussionId], {
+      body: posts.body,
+      discussionId: posts.discussionId,
+    })
+    .from(posts)
+    .orderBy(desc(posts.discussionId), asc(posts.createdAt))
+    .where(isNull(posts.parentId))
+    .as('firstPost')
+
+  const replies = db
+    .select({
+      discussionId: posts.discussionId,
+      count: sql`COUNT(${posts.id})`.as('count'),
+    })
+    .from(posts)
+    .where(not(isNull(posts.parentId)))
+    .groupBy(posts.discussionId)
+    .as('replies')
+
+  const participant = db
+    .select({
+      discussionId: posts.discussionId,
+    })
+    .from(posts)
+    .groupBy(posts.discussionId)
+    .where(eq(posts.userId, ctx.session?.user.id ?? ''))
+    .as('participant')
+
+  if (noReply) {
+    where = and(where, isNull(firstPost.discussionId))
+  }
+
+  if (!!input?.topic) {
+    where = and(where, eq(topics.slug, input.topic))
+  }
+
+  if (Boolean(input?.my_discussions) && ctx.session?.user) {
+    where = and(where, eq(discussions.userId, ctx.session.user.id))
+  }
+
+  if (Boolean(input?.participating) && ctx.session?.user) {
+    where = and(where, not(isNull(participant.discussionId)))
+  }
+
+  return db
+    .select({
+      id: discussions.id,
+      title: discussions.title,
+      slug: discussions.slug,
+      pinnedAt: discussions.pinnedAt,
+      topic: topics.title,
+      bodyPreview: sql`COALESCE(SUBSTRING(${firstPost.body}, 1, 200), '')`.as(
+        'bodyPreview',
+      ),
+      lastPost: {
+        username: sql`COALESCE(${lastPost.username}, '')`.as('username'),
+        updatedAt: lastPost.updatedAt,
+      },
+      avatars: sql`
+        COALESCE(
+          jsonb_agg(
+            distinct jsonb_build_object('username', ${users.username}, 'image', ${users.image})) filter (where ${users.image} is not null
+          ),
+        '[]')`.as('avatars'),
+      replies: sql`CAST(COALESCE(${replies.count}, 0) as int)`.as('replies'),
+    })
+    .from(discussions)
+    .leftJoin(participant, eq(discussions.id, participant.discussionId))
+    .leftJoin(replies, eq(discussions.id, replies.discussionId))
+    .leftJoin(firstPost, eq(discussions.id, firstPost.discussionId))
+    .leftJoin(lastPost, eq(discussions.id, lastPost.discussionId))
+    .leftJoin(posts, eq(discussions.id, posts.discussionId))
+    .leftJoin(users, eq(posts.userId, users.id))
+    .leftJoin(topics, eq(discussions.topicId, topics.id))
+    .orderBy(
+      sql`${discussions.pinnedAt} DESC NULLS LAST, ${lastPost.updatedAt} DESC NULLS LAST`,
+    )
+    .groupBy(
+      discussions.id,
+      topics.title,
+      firstPost.body,
+      lastPost.username,
+      lastPost.updatedAt,
+      replies.count,
+    )
+    .where(where)
 }
 
 export const discussionsRouter = createTRPCRouter({
   find: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    const row = await ctx.db
-      .select(SELECT_DISCUSSION)
-      .from(discussions)
-      .leftJoin(topics, eq(discussions.topicId, topics.id))
+    const rows = await getQueryDiscussion(ctx)
       .where(eq(discussions.slug, input))
       .limit(1)
 
-    const discussion = row[0]
+    type Row = Omit<
+      (typeof rows)[0],
+      'replies' | 'bodyPreview' | 'avatars' | 'lastPost'
+    > & {
+      replies: number
+      bodyPreview: string
+      avatars: { username: string; image: string }[]
+      lastPost: {
+        username: string
+        updatedAt: Date
+      }
+    }
+
+    const discussion = rows[0] as Row | undefined
 
     if (!discussion) {
       throw new TRPCError({
@@ -54,107 +158,35 @@ export const discussionsRouter = createTRPCRouter({
 
     return discussion
   }),
-
   all: publicProcedure.input(discussionsInput).query(async ({ ctx, input }) => {
-    let where: SQL | undefined
+    const query = getQueryDiscussion(ctx, input)
 
-    if (input.topic) {
-      where = eq(topics.slug, input.topic)
-    }
+    const totalRows = (await query).length
 
-    const count = await ctx.db
-      .select({
-        totalRows: sql`COUNT(*)`,
-      })
-      .from(discussions)
-      .leftJoin(topics, eq(discussions.topicId, topics.id))
-      .where(where)
-
-    const totalRows = Number(count[0].totalRows)
-
-    const meta = await getMeta({
+    const meta = getMeta({
       cursor: input.cursor,
       page: input.page,
       perPage: input.perPage,
       totalRows,
     })
 
-    const sqLastUserPosted = ctx.db
-      .selectDistinctOn([posts.discussionId], {
-        id: users.id,
-        username: users.username,
-        discussionId: posts.discussionId,
-        updatedAt: posts.updatedAt,
-      })
-      .from(posts)
-      .leftJoin(users, eq(posts.userId, users.id))
-      .orderBy(() => [desc(posts.discussionId), desc(posts.updatedAt)])
-      .as('lastUserPost')
+    const rows = await query.limit(meta.limit).offset(meta.offset)
 
-    const sqlFirstPost = ctx.db
-      .selectDistinctOn([posts.discussionId], {
-        body: posts.body,
-        discussionId: posts.discussionId,
-      })
-      .from(posts)
-      .orderBy(desc(posts.discussionId), asc(posts.createdAt))
-      .where(isNull(posts.parentId))
-      .as('firstPost')
-
-    const replies = ctx.db
-      .select({
-        discussionId: posts.discussionId,
-        count: sql`COUNT(${posts.id})`.as('count'),
-      })
-      .from(posts)
-      .where(not(isNull(posts.parentId)))
-      .groupBy(posts.discussionId)
-      .as('replies')
-
-    const rows = await ctx.db
-      .select({
-        id: discussions.id,
-        title: discussions.title,
-        slug: discussions.slug,
-        pinnedAt: discussions.pinnedAt,
-        topic: topics.slug,
-        bodyPreview: sql`SUBSTRING(${sqlFirstPost.body}, 1, 200)`,
-        userLastPost: {
-          username: sqLastUserPosted.username,
-          updatedAt: sqLastUserPosted.updatedAt,
-        },
-        avatars: sql`json_agg(${users.image})`,
-        replies: replies.count,
-      })
-      .from(discussions)
-      .leftJoin(replies, eq(discussions.id, replies.discussionId))
-      .leftJoin(sqlFirstPost, eq(discussions.id, sqlFirstPost.discussionId))
-      .leftJoin(
-        sqLastUserPosted,
-        eq(discussions.id, sqLastUserPosted.discussionId),
-      )
-      .leftJoin(posts, eq(discussions.id, posts.discussionId))
-      .leftJoin(users, eq(posts.userId, users.id))
-      .leftJoin(topics, eq(discussions.topicId, topics.id))
-      .where(where)
-      .orderBy(
-        sql`${discussions.pinnedAt} DESC NULLS LAST, ${sqLastUserPosted.updatedAt} DESC NULLS LAST`,
-      )
-      .groupBy(
-        discussions.id,
-        topics.slug,
-        sqlFirstPost.body,
-        sqLastUserPosted.username,
-        sqLastUserPosted.updatedAt,
-        replies.count,
-      )
-      .limit(meta.limit)
-      .offset(meta.offset)
-
-    console.log(rows)
+    type Row = Omit<
+      (typeof rows)[0],
+      'replies' | 'bodyPreview' | 'avatars' | 'lastPost'
+    > & {
+      replies: number
+      bodyPreview: string
+      avatars: { username: string; image: string }[]
+      lastPost: {
+        username: string
+        updatedAt: Date
+      }
+    }
 
     return {
-      data: rows,
+      data: rows as Row[],
       meta,
     }
   }),

@@ -7,7 +7,6 @@ import EmailProvider from 'next-auth/providers/email'
 import GoogleProvider from 'next-auth/providers/google'
 import { schema, users } from '../db/schema'
 import { mail } from '../mail/mail'
-import { getSignedUrlForGet } from '../storage/s3'
 import { pgDrizzleAdapter } from './drizzle-pg-adapter'
 
 const strategy: SessionStrategy = 'database'
@@ -49,10 +48,7 @@ export const authOptions: NextAuthOptions = {
 
       // TODO: if user comes from google, download the image and upload it to s3
 
-      session.user.image = await getSignedUrlForGet(
-        dbUser.image,
-        session.user.image,
-      )
+      session.user.image = dbUser.image
       session.user.id = dbUser.id
       session.user.name = dbUser.name
       session.user.email = dbUser.email

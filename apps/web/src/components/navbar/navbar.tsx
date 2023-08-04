@@ -59,7 +59,12 @@ const Navbar = () => {
               <DropdownMenuTrigger className="hidden items-center gap-2 sm:flex">
                 <Avatar className="h-6 w-6">
                   <AvatarImage
-                    src={user.image ?? ''}
+                    src={
+                      user.image?.startsWith('http')
+                        ? user.image
+                        : 'https://pub-0637cd4742424108ae93e8b53807b17a.r2.dev/' +
+                          user.image
+                    }
                     alt={user?.name ?? ''}
                     className="object-cover"
                   />

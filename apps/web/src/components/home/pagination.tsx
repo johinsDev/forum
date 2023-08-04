@@ -111,7 +111,7 @@ const Pagination: FC<PaginationProps> = (props) => {
       {pages.map((page) => (
         <Link
           href={{
-            pathname: `/`,
+            pathname,
             query: {
               ...Object.fromEntries(params),
               page,
