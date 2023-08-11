@@ -14,6 +14,13 @@ const Toaster = dynamic(() =>
   import('@/components/ui/toaster').then((mod) => mod.Toaster),
 )
 
+const CreateDiscussion = dynamic(
+  () => import('@/components/shared/create-discussion'),
+  {
+    ssr: false,
+  },
+)
+
 function Auth({
   children,
   loading,
@@ -77,6 +84,8 @@ const MyApp: AppType<{ session: Session | null }> = ({
           )}
         </main>
         <Toaster />
+
+        <CreateDiscussion />
       </SessionProvider>
     </div>
   )

@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useToast } from '@/hooks/use-toast'
 import { date, to } from '@/lib/date'
 import { api } from '@/utils/api'
+import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 
@@ -14,19 +15,17 @@ function Discussion() {
 
   const { toast } = useToast()
 
-  console.log(
-    'query',
-    api.useContext().discussion.all.getData({
-      page: 1,
-      topic: undefined,
-    }),
-  )
+  const queryData = useQueryClient().getQueriesData([['discussion', 'all']])
+
   const {
     data: discussion,
     error,
     isLoading,
   } = api.discussion.find.useQuery(query.slug as string, {
     enabled: !!query.slug,
+    placeholderData: queryData
+      .flatMap(([, data]) => (data as any).data)
+      ?.find((d: any) => d?.slug === query.slug),
   })
 
   useEffect(() => {
@@ -120,7 +119,7 @@ function Posts() {
     {
       slug: query.slug as string,
       page: query.page ? Number(query.page) : 1,
-      perPage: 2,
+      perPage: query.perPage ? Number(query.perPage) : 10,
     },
     {
       enabled: !!query.slug,

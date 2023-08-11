@@ -7,17 +7,38 @@ import {
 } from '@/components/ui/select'
 import { api } from '@/utils/api'
 import { useRouter } from 'next/router'
-import { memo } from 'react'
 
-const SelectTopic_ = () => {
-  const { push, pathname, query } = useRouter()
+interface SelectTopicProps extends React.ComponentProps<typeof Select> {
+  children?: React.ReactNode
+}
 
-  const value = (query.topic ?? 'all') as string
-
+export const SelectTopic = (props: SelectTopicProps) => {
   const { data: topics } = api.topic.all.useQuery(undefined, {
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
   })
+
+  return (
+    <Select onValueChange={props.onValueChange} value={props.value}>
+      <SelectTrigger className="w-[180px]">
+        <SelectValue placeholder="Select Topic" defaultValue="all" />
+      </SelectTrigger>
+      <SelectContent>
+        {topics?.map((topic) => (
+          <SelectItem key={topic.id} value={topic.slug}>
+            {topic.title}
+          </SelectItem>
+        ))}
+        {props.children}
+      </SelectContent>
+    </Select>
+  )
+}
+
+export const SelectTopicRouter = () => {
+  const { push, pathname, query } = useRouter()
+
+  const value = (query.topic ?? 'all') as string
 
   const onValueChange = (value: string) => {
     const params = new URLSearchParams(query as any)
@@ -37,20 +58,8 @@ const SelectTopic_ = () => {
   }
 
   return (
-    <Select onValueChange={onValueChange} value={value}>
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Select Topic" defaultValue="all" />
-      </SelectTrigger>
-      <SelectContent>
-        {topics?.map((topic) => (
-          <SelectItem key={topic.id} value={topic.slug}>
-            {topic.title}
-          </SelectItem>
-        ))}
-        <SelectItem value="all">All</SelectItem>
-      </SelectContent>
-    </Select>
+    <SelectTopic onValueChange={onValueChange} value={value}>
+      <SelectItem value="all">All</SelectItem>
+    </SelectTopic>
   )
 }
-
-export const SelectTopic = memo(SelectTopic_)

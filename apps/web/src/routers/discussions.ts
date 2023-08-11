@@ -1,10 +1,14 @@
+import { DbClient } from '@/lib/db'
 import { discussions, posts, topics, users } from '@/lib/db/schema'
 import { getMeta, paginationInput } from '@/lib/pagination'
+import { slugify } from '@/lib/slug'
 import {
   createInnerTRPCContext,
   createTRPCRouter,
+  protectedProcedure,
   publicProcedure,
 } from '@/lib/trpc/trpc'
+import { createDiscussion } from '@/schemas/discussion'
 import { TRPCError } from '@trpc/server'
 import { SQL, and, asc, desc, eq, isNull, not, sql } from 'drizzle-orm'
 import { z } from 'zod'
@@ -15,8 +19,18 @@ const discussionsInput = paginationInput.merge(
     no_replies: z.enum(['true', 'false']).optional().nullable(),
     my_discussions: z.enum(['true', 'false']).optional().nullable(),
     participating: z.enum(['true', 'false']).optional().nullable(),
+    q: z.string().optional().nullable(),
   }),
 )
+
+function discussionSlug(name: string, db: DbClient, currentId?: number) {
+  return slugify(name, db, {
+    currentId,
+    idColumn: topics.id,
+    slugColumn: topics.slug,
+    table: topics,
+  })
+}
 
 function getQueryDiscussion(
   ctx: ReturnType<typeof createInnerTRPCContext>,
@@ -115,7 +129,9 @@ function getQueryDiscussion(
     .leftJoin(users, eq(posts.userId, users.id))
     .leftJoin(topics, eq(discussions.topicId, topics.id))
     .orderBy(
-      sql`${discussions.pinnedAt} DESC NULLS LAST, ${lastPost.updatedAt} DESC NULLS LAST`,
+      sql`${discussions.pinnedAt} DESC NULLS LAST,
+      COALESCE(${lastPost.updatedAt}, ${discussions.createdAt}) DESC,
+      ${discussions.updatedAt} DESC`,
     )
     .groupBy(
       discussions.id,
@@ -190,4 +206,34 @@ export const discussionsRouter = createTRPCRouter({
       meta,
     }
   }),
+  create: protectedProcedure
+    .input(createDiscussion)
+    .mutation(async ({ ctx, input }) => {
+      const slug = await discussionSlug(input.title, ctx.db)
+
+      const topic = await ctx.db.query.topics.findFirst({
+        where: eq(topics.slug, input.topicSlug),
+        columns: {
+          id: true,
+        },
+      })
+
+      if (!topic?.id) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Topic not found',
+        })
+      }
+
+      return ctx.db
+        .insert(discussions)
+        .values({
+          title: input.title,
+          slug,
+          topicId: topic.id,
+          userId: ctx.session.user.id,
+          body: input.body,
+        })
+        .returning()
+    }),
 })

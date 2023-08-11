@@ -1,7 +1,7 @@
 import Discussion from '@/components/home/dicussion'
 import DiscussionSkeleton from '@/components/home/discussion-skeleton'
 import Pagination from '@/components/home/pagination'
-import { SelectTopic } from '@/components/home/select-topic'
+import { SelectTopicRouter } from '@/components/home/select-topic'
 import DiscussionLayout from '@/components/layouts/discussion-layout'
 import { api } from '@/utils/api'
 import { useRouter } from 'next/router'
@@ -22,7 +22,7 @@ const HomePage = () => {
   return (
     <DiscussionLayout>
       <div className="bg-white p-6 text-gray-900 shadow-sm sm:rounded-lg">
-        <SelectTopic />
+        <SelectTopicRouter />
       </div>
 
       {isLoading &&

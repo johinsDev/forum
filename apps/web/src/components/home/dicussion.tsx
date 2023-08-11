@@ -33,8 +33,11 @@ const Discussion: FC<DiscussionProps> = ({
   const isPinned = !!pinnedAt
   return (
     <Link
-      href={`/discussion/${slug}`}
-      className="flex items-center bg-white p-6 text-gray-900 shadow-sm sm:rounded-lg"
+      href={{
+        pathname: `/discussion/${slug}`,
+        hash: location.hash,
+      }}
+      className="flex items-start bg-white p-6 text-gray-900 shadow-sm sm:rounded-lg"
     >
       <div className="flex-grow">
         <div className="flex items-center space-x-3">

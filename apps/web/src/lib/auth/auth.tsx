@@ -1,18 +1,19 @@
 import MagicLinkEmail from '@/emails/magic-link'
 import { db } from '@/lib/db'
+import { DrizzleAdapter } from '@auth/drizzle-adapter'
 import { eq } from 'drizzle-orm'
 import { GetServerSidePropsContext } from 'next'
 import { NextAuthOptions, SessionStrategy, getServerSession } from 'next-auth'
 import EmailProvider from 'next-auth/providers/email'
 import GoogleProvider from 'next-auth/providers/google'
-import { schema, users } from '../db/schema'
+import { users } from '../db/schema'
 import { mail } from '../mail/mail'
-import { pgDrizzleAdapter } from './drizzle-pg-adapter'
 
 const strategy: SessionStrategy = 'database'
 
 export const authOptions: NextAuthOptions = {
-  adapter: pgDrizzleAdapter(db, schema),
+  // @ts-expect-error TODO: fix this
+  adapter: DrizzleAdapter(db),
   session: {
     strategy,
   },
