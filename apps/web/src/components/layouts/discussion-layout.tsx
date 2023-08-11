@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { FC } from 'react'
 import { buttonVariants } from '../ui/button'
+import SkeletonButton from '../ui/skeleton/skeleton-button'
 
 interface DiscussionLayoutProps {
   children: React.ReactNode
@@ -71,23 +72,35 @@ const DiscussionLayout: FC<DiscussionLayoutProps> = ({ children }) => {
 
   const hasFilter = FILTERS.some((filter) => params.has(filter))
 
+  const isAuth = session.status === 'authenticated'
+
+  const isLoading = session.status === 'loading'
+
   return (
     <div className="grid-cols-7 gap-6 space-y-6 md:grid md:space-y-0">
       <div className="col-span-2 space-y-3 overflow-hidden">
-        <Link
-          href={{
-            pathname,
-            query,
-            hash: '#new-discussion',
-          }}
-          className={buttonVariants({
-            full: true,
-            size: 'sm',
-            className: 'uppercase',
-          })}
-        >
-          Start a discussion
-        </Link>
+        {isAuth && (
+          <Link
+            href={{
+              pathname,
+              query,
+              hash: '#new-discussion',
+            }}
+            className={buttonVariants({
+              full: true,
+              size: 'sm',
+              className: 'uppercase',
+            })}
+          >
+            Start a discussion
+          </Link>
+        )}
+
+        {isLoading && (
+          <SkeletonButton full size={'sm'}>
+            Start a discussion
+          </SkeletonButton>
+        )}
 
         <nav className="space-y-3 bg-white p-6 text-gray-900 shadow-sm sm:rounded-lg">
           <ul className="space-y-2">
@@ -113,6 +126,14 @@ const DiscussionLayout: FC<DiscussionLayoutProps> = ({ children }) => {
               <li>
                 <FilterNav filter="participating" label="Participating" />
               </li>
+            </ul>
+          )}
+
+          {isLoading && (
+            <ul className="space-y-2 border-t border-t-gray-100 pt-3">
+              <li className="h-6 w-28 animate-pulse rounded-lg bg-slate-300" />
+
+              <li className="h-6 w-24 animate-pulse rounded-lg bg-slate-300" />
             </ul>
           )}
         </nav>

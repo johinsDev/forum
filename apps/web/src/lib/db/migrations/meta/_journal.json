@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1690502504066,
-      "tag": "0000_yummy_next_avengers",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1690556906233,
-      "tag": "0001_unknown_victor_mancha",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1690561630955,
-      "tag": "0002_even_dark_beast",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1690823132265,
-      "tag": "0003_glossy_hellcat",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1691725947372,
-      "tag": "0004_organic_may_parker",
+      "when": 1691773115227,
+      "tag": "0000_handy_johnny_storm",
       "breakpoints": true
     }
   ]

@@ -1,1 +1,0 @@
-ALTER TABLE "discussions" ADD COLUMN "body" text;

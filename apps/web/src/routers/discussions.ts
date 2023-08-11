@@ -1,7 +1,5 @@
-import { DbClient } from '@/lib/db'
 import { discussions, posts, topics, users } from '@/lib/db/schema'
 import { getMeta, paginationInput } from '@/lib/pagination'
-import { slugify } from '@/lib/slug'
 import {
   createInnerTRPCContext,
   createTRPCRouter,
@@ -11,6 +9,8 @@ import {
 import { createDiscussion } from '@/schemas/discussion'
 import { TRPCError } from '@trpc/server'
 import { SQL, and, asc, desc, eq, isNull, not, sql } from 'drizzle-orm'
+import { nanoid } from 'nanoid'
+import slugify from 'slugify'
 import { z } from 'zod'
 
 const discussionsInput = paginationInput.merge(
@@ -22,15 +22,6 @@ const discussionsInput = paginationInput.merge(
     q: z.string().optional().nullable(),
   }),
 )
-
-function discussionSlug(name: string, db: DbClient, currentId?: number) {
-  return slugify(name, db, {
-    currentId,
-    idColumn: topics.id,
-    slugColumn: topics.slug,
-    table: topics,
-  })
-}
 
 function getQueryDiscussion(
   ctx: ReturnType<typeof createInnerTRPCContext>,
@@ -47,6 +38,7 @@ function getQueryDiscussion(
       username: users.username,
       discussionId: posts.discussionId,
       updatedAt: posts.updatedAt,
+      email: users.email,
     })
     .from(posts)
     .leftJoin(users, eq(posts.userId, users.id))
@@ -109,7 +101,9 @@ function getQueryDiscussion(
         'bodyPreview',
       ),
       lastPost: {
-        username: sql`COALESCE(${lastPost.username}, '')`.as('username'),
+        username: sql`COALESCE(${lastPost.username}, ${lastPost.email}, '')`.as(
+          'username',
+        ),
         updatedAt: lastPost.updatedAt,
       },
       avatars: sql`
@@ -139,6 +133,7 @@ function getQueryDiscussion(
       firstPost.body,
       lastPost.username,
       lastPost.updatedAt,
+      lastPost.email,
       replies.count,
     )
     .where(where)
@@ -209,7 +204,15 @@ export const discussionsRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createDiscussion)
     .mutation(async ({ ctx, input }) => {
-      const slug = await discussionSlug(input.title, ctx.db)
+      const discussionId = nanoid()
+
+      const slug =
+        discussionId +
+        '-' +
+        slugify(input.title, {
+          lower: true,
+          trim: true,
+        })
 
       const topic = await ctx.db.query.topics.findFirst({
         where: eq(topics.slug, input.topicSlug),
@@ -225,15 +228,27 @@ export const discussionsRouter = createTRPCRouter({
         })
       }
 
-      return ctx.db
-        .insert(discussions)
-        .values({
-          title: input.title,
-          slug,
-          topicId: topic.id,
-          userId: ctx.session.user.id,
-          body: input.body,
-        })
-        .returning()
+      const discussion = (
+        await ctx.db
+          .insert(discussions)
+          .values({
+            id: discussionId,
+            title: input.title,
+            slug,
+            topicId: topic.id,
+            userId: ctx.session.user.id,
+          })
+          .returning({
+            id: discussions.id,
+          })
+      )[0]
+
+      await ctx.db.insert(posts).values({
+        body: input.body,
+        discussionId: discussion.id,
+        userId: ctx.session.user.id,
+      })
+
+      return discussion
     }),
 })

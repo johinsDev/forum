@@ -3,6 +3,7 @@ import { createDiscussion } from '@/schemas/discussion'
 import { api } from '@/utils/api'
 import { isTRPCClientError, isZodError } from '@/utils/is-trpc-error'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { FC } from 'react'
 import { useForm } from 'react-hook-form'
@@ -95,6 +96,12 @@ const CreateDiscussion: FC<CreateDiscussionProps> = ({}) => {
   const onSubmit = async (values: discussionValues) => {
     mutation.mutate(values)
   }
+
+  const session = useSession()
+
+  const isAuth = session.status === 'authenticated'
+
+  if (!isAuth) return null
 
   return (
     <Dialog modal={false} open={open} onOpenChange={onOpenChange}>

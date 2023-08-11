@@ -1,1 +1,0 @@
-ALTER TABLE "topics" RENAME COLUMN "name" TO "title";

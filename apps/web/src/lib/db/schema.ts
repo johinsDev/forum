@@ -96,14 +96,13 @@ export const topicsRelations = relations(topics, ({ many }) => ({
 export const discussions = pgTable(
   'discussions',
   {
-    id: serial('id').notNull().primaryKey(),
+    id: text('id').notNull().primaryKey(),
     userId: text('userId').references(() => users.id, {
       onDelete: 'set null',
     }),
     topicId: integer('topicId').references(() => topics.id),
     title: text('title').notNull(),
     slug: text('slug').notNull(),
-    body: text('body'),
     pinnedAt: timestamp('pinnedAt', { mode: 'date' }),
     createdAt: timestamp('createdAt', { mode: 'date' }).notNull().defaultNow(),
     updatedAt: timestamp('updatedAt', { mode: 'date' }).notNull().defaultNow(),
@@ -130,7 +129,7 @@ export const posts = pgTable('posts', {
   userId: text('userId').references(() => users.id, {
     onDelete: 'set null',
   }),
-  discussionId: integer('discussionId').references(() => discussions.id, {
+  discussionId: text('discussionId').references(() => discussions.id, {
     onDelete: 'cascade',
   }),
   parentId: integer('parentId').references((): AnyPgColumn => posts.id),
