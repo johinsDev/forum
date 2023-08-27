@@ -12,7 +12,7 @@ import {
 import { AdapterAccount } from 'next-auth/adapters'
 
 export const users = pgTable(
-  'users',
+  'user',
   {
     id: text('id').notNull().primaryKey(),
     name: text('name'),
@@ -34,7 +34,7 @@ export const userRelations = relations(users, ({ many }) => ({
 }))
 
 export const accounts = pgTable(
-  'accounts',
+  'account',
   {
     userId: text('userId')
       .notNull()
@@ -55,7 +55,7 @@ export const accounts = pgTable(
   }),
 )
 
-export const sessions = pgTable('sessions', {
+export const sessions = pgTable('session', {
   sessionToken: text('sessionToken').notNull().primaryKey(),
   userId: text('userId')
     .notNull()

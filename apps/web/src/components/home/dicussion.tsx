@@ -1,22 +1,11 @@
 import { date, to } from '@/lib/date'
+import { RouterOutputs } from '@/utils/api'
 import Link from 'next/link'
 import pluralize from 'pluralize'
 import { FC } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 
-type DiscussionProps = {
-  title: string
-  slug: string
-  topic: string | null
-  pinnedAt: Date | null
-  avatars: { username: string; image: string }[]
-  bodyPreview: string | null
-  replies: number | null
-  lastPost: {
-    username: string | null
-    updatedAt: Date | null
-  } | null
-}
+type DiscussionProps = RouterOutputs['discussion']['all']['data'][0]
 
 const NUM_OF_AVATARS = 3
 
@@ -31,11 +20,12 @@ const Discussion: FC<DiscussionProps> = ({
   replies,
 }) => {
   const isPinned = !!pinnedAt
+
   return (
     <Link
       href={{
         pathname: `/discussion/${slug}`,
-        hash: location.hash,
+        hash: typeof window !== 'undefined' ? location.hash : '',
       }}
       className="flex items-start bg-white p-6 text-gray-900 shadow-sm sm:rounded-lg"
     >
@@ -54,13 +44,25 @@ const Discussion: FC<DiscussionProps> = ({
         </div>
 
         {!!bodyPreview && (
-          <div className="mt-3 line-clamp-1 text-sm text-gray-500">
-            {bodyPreview}
-          </div>
+          <div
+            className="mt-3 line-clamp-1 text-sm text-gray-500"
+            dangerouslySetInnerHTML={{
+              __html: bodyPreview,
+            }}
+          />
         )}
 
         {!!lastPost && (
-          <div className="mt-3 inline-block text-sm">
+          <Link
+            href={{
+              pathname: `/discussion/${slug}`,
+              query: {
+                post: lastPost.id,
+                page: 1,
+              },
+            }}
+            className="mt-3 inline-block text-sm"
+          >
             Last post by {lastPost?.username || '[User deleted]'}{' '}
             <time
               dateTime={lastPost?.updatedAt?.toISOString()}
@@ -68,7 +70,7 @@ const Discussion: FC<DiscussionProps> = ({
             >
               {to(lastPost?.updatedAt)}
             </time>
-          </div>
+          </Link>
         )}
       </div>
 
@@ -103,9 +105,9 @@ const Discussion: FC<DiscussionProps> = ({
           )}
         </div>
 
-        {!!replies && (
+        {!isNaN(replies ?? NaN) && (
           <div className="mt-3 text-sm">
-            {replies} {pluralize('reply', replies)}
+            {replies} {pluralize('reply', replies ?? 0)}
           </div>
         )}
       </div>

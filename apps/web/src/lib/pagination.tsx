@@ -1,15 +1,8 @@
 import { z } from 'zod'
 
 export const paginationInput = z.object({
-  perPage: z
-    .number()
-    .min(1)
-    .max(100)
-    .positive()
-    .default(10)
-    .optional()
-    .nullable(),
-  page: z.number().min(1).default(1).optional().nullable(),
+  perPage: z.number().default(10).optional().nullable(),
+  page: z.number().default(1).optional().nullable(),
   cursor: z.number().nullish().optional(), // <-- "cursor" needs to exist, but can be any type
 })
 

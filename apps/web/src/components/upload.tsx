@@ -82,7 +82,7 @@ const Upload: FC<UploadProps> = ({ value, onChange, accept }) => {
   return (
     <div
       {...getRootProps()}
-      className="relative flex aspect-square h-36 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-slate-100 p-2 text-center hover:border-primary-600"
+      className="hover:border-primary-600 relative flex aspect-square h-36 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-slate-100 p-2 text-center"
     >
       <input {...getInputProps()} />
 

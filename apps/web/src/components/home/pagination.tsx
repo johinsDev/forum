@@ -6,7 +6,9 @@ import { useRouter } from 'next/router'
 import { FC, useRef } from 'react'
 
 interface PaginationProps
-  extends Partial<Pick<PaginationResult, 'page' | 'totalPages'>> {}
+  extends Partial<Pick<PaginationResult, 'page' | 'totalPages'>> {
+  remove?: string[]
+}
 
 const NUMBER_PER_SECTION = 5
 
@@ -22,8 +24,21 @@ function range(start: number, end: number) {
   return new Array(end - start + 1).fill(0).map((_, index) => index + start)
 }
 
+function omit<T extends Record<string, unknown>, K extends keyof T>(
+  obj: T,
+  keys: K[],
+): Omit<T, K> {
+  const result = { ...obj }
+
+  for (const key of keys) {
+    delete result[key]
+  }
+
+  return result
+}
+
 const Pagination: FC<PaginationProps> = (props) => {
-  const { pathname, query } = useRouter()
+  const { pathname, query, asPath } = useRouter()
 
   const currentRefPage = useRef(props.page ?? Number(query.page ?? 1))
 
@@ -54,6 +69,15 @@ const Pagination: FC<PaginationProps> = (props) => {
     Math.min(section * NUMBER_PER_SECTION, totalPages),
   )
 
+  function getQuery(page: number) {
+    return !props.remove
+      ? { ...Object.fromEntries(params), page }
+      : {
+          ...omit(Object.fromEntries(params), props.remove),
+          page,
+        }
+  }
+
   if (totalPages === 1) {
     return null
   }
@@ -63,10 +87,7 @@ const Pagination: FC<PaginationProps> = (props) => {
       <Link
         href={{
           pathname,
-          query: {
-            ...Object.fromEntries(params),
-            page: currentPage - 1,
-          },
+          query: getQuery(currentPage - 1),
         }}
         className={cn(
           'flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600',
@@ -84,10 +105,7 @@ const Pagination: FC<PaginationProps> = (props) => {
           <Link
             href={{
               pathname,
-              query: {
-                ...Object.fromEntries(params),
-                page: 1,
-              },
+              query: getQuery(1),
             }}
             className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600"
           >
@@ -96,10 +114,7 @@ const Pagination: FC<PaginationProps> = (props) => {
           <Link
             href={{
               pathname,
-              query: {
-                ...Object.fromEntries(params),
-                page: (section - 2) * NUMBER_PER_SECTION + 1,
-              },
+              query: getQuery((section - 2) * NUMBER_PER_SECTION + 1),
             }}
             className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600"
           >
@@ -112,10 +127,7 @@ const Pagination: FC<PaginationProps> = (props) => {
         <Link
           href={{
             pathname,
-            query: {
-              ...Object.fromEntries(params),
-              page,
-            },
+            query: getQuery(page),
           }}
           className={cn(
             'flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600',
@@ -134,10 +146,7 @@ const Pagination: FC<PaginationProps> = (props) => {
           <Link
             href={{
               pathname,
-              query: {
-                ...Object.fromEntries(params),
-                page: section * NUMBER_PER_SECTION + 1,
-              },
+              query: getQuery(section * NUMBER_PER_SECTION + 1),
             }}
             className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600"
           >
@@ -146,10 +155,7 @@ const Pagination: FC<PaginationProps> = (props) => {
           <Link
             href={{
               pathname,
-              query: {
-                ...Object.fromEntries(params),
-                page: totalPages,
-              },
+              query: getQuery(totalPages),
             }}
             className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600"
           >
@@ -167,10 +173,7 @@ const Pagination: FC<PaginationProps> = (props) => {
         )}
         href={{
           pathname,
-          query: {
-            ...Object.fromEntries(params),
-            page: currentPage + 1,
-          },
+          query: getQuery(currentPage + 1),
         }}
       >
         Next

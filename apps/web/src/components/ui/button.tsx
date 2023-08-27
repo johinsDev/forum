@@ -26,6 +26,9 @@ const buttonVariants = cva(
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
       },
+      uppercase: {
+        true: 'uppercase tracking-wider',
+      },
       size: {
         default: 'h-10 px-4 py-2',
         sm: 'h-9 rounded-md px-3',
@@ -38,6 +41,7 @@ const buttonVariants = cva(
       size: 'default',
       full: false,
       loading: false,
+      uppercase: true,
     },
   },
 )
@@ -63,6 +67,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       rightIcon,
       leftIcon,
       loaderPosition = 'left',
+      uppercase,
       ...props
     },
     ref,
@@ -71,9 +76,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Comp
         disabled={loading ?? false}
-        className={cn(buttonVariants({ variant, size, className, loading }), {
-          'gap-2': !!leftIcon || !!rightIcon,
-        })}
+        className={cn(
+          buttonVariants({ variant, size, className, loading, uppercase }),
+          {
+            'gap-2': !!leftIcon || !!rightIcon,
+          },
+        )}
         ref={ref}
         {...props}
       >

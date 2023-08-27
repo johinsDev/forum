@@ -1,10 +1,10 @@
+import { useRouterModal } from '@/hooks/use-router-modal'
 import { useToast } from '@/hooks/use-toast'
 import { createDiscussion } from '@/schemas/discussion'
 import { api } from '@/utils/api'
 import { isTRPCClientError, isZodError } from '@/utils/is-trpc-error'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/router'
 import { FC } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -18,9 +18,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../ui/dialog'
+import Editor from '../ui/editor'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form'
 import { Input } from '../ui/input'
-import { Textarea } from '../ui/textarea'
 
 interface CreateDiscussionProps {}
 
@@ -29,32 +29,13 @@ type discussionValues = z.infer<typeof createDiscussion>
 const CreateDiscussion: FC<CreateDiscussionProps> = ({}) => {
   const { toast } = useToast()
 
-  const { asPath, push, replace, pathname, query } = useRouter()
-
-  const open = asPath.split('#')[1] === 'new-discussion'
+  const { open, onOpenChange } = useRouterModal('new-discussion')
 
   const form = useForm<discussionValues>({
     resolver: zodResolver(createDiscussion),
   })
 
   const utils = api.useContext()
-
-  function onOpenChange(open: boolean) {
-    if (!open) {
-      replace({
-        pathname,
-        query,
-      })
-    }
-
-    if (open) {
-      push({
-        pathname,
-        query,
-        hash: '#new-discussion',
-      })
-    }
-  }
 
   const mutation = api.discussion.create.useMutation({
     onSuccess() {
@@ -123,7 +104,7 @@ const CreateDiscussion: FC<CreateDiscussionProps> = ({}) => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="space-y-4">
-              <div className="flex items-center gap-4">
+              <div className="flex items-start gap-4">
                 <FormField
                   control={form.control}
                   name="title"
@@ -164,10 +145,7 @@ const CreateDiscussion: FC<CreateDiscussionProps> = ({}) => {
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormControl>
-                      <Textarea
-                        placeholder="Start typing your discussion here..."
-                        {...field}
-                      />
+                      <Editor placeholder="Start typing..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -176,8 +154,12 @@ const CreateDiscussion: FC<CreateDiscussionProps> = ({}) => {
             </div>
 
             <DialogFooter className="mt-6">
-              <Button type="submit" loading={mutation.isLoading}>
-                Create
+              <Button
+                type="submit"
+                loading={mutation.isLoading}
+                className="mr-auto"
+              >
+                Create Discussion
               </Button>
             </DialogFooter>
           </form>

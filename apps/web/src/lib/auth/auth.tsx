@@ -12,7 +12,6 @@ import { mail } from '../mail/mail'
 const strategy: SessionStrategy = 'database'
 
 export const authOptions: NextAuthOptions = {
-  // @ts-expect-error TODO: fix this
   adapter: DrizzleAdapter(db),
   session: {
     strategy,
@@ -46,8 +45,6 @@ export const authOptions: NextAuthOptions = {
       if (!dbUser) {
         return session
       }
-
-      // TODO: if user comes from google, download the image and upload it to s3
 
       session.user.image = dbUser.image
       session.user.id = dbUser.id

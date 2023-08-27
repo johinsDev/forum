@@ -152,21 +152,6 @@ const ProfileForm: FC = () => {
 export default ProfileForm
 
 // TODO:
-// procedure ralimit
-// pagination bugs when is empty
-// bull queue
-// edge-csrf if we need procedure
-// github action migrations
-// rewrite email templates with tailwind
-// nprogress
-// TWO FACTOR AUTH (password)
-// LINK AND UNLINK ACCOUNTS
-// ACTIVATE ACCOUNTS
-// error login/register review next-auth cuistom pages
-// review integration with imgix loader
-// algolia
-// skeleton auth pages, pages redirect if login, user me
-// divider, card, badge component, icon componetn
 
 // next-translations
 // ahooks
@@ -175,14 +160,10 @@ export default ProfileForm
 // next-seo
 // ligihouse CI
 // commitlint\
-// dand kit ,react-node, react-moveable,teact-table,react-virtual, milliopn js
-// react balancer and tailwind capzise
-// keen slider, downshift
-
-// trpc syubscription
 // event emitter
-// stripte
-// improve upload component
+
+// stripte/lemon squize / subscriptions
+// trpc syubscription / pusher
 // SASS template (teams, impersonation, roles)
-// SDK AI
-// APP Router
+// SDK AI, Drang And Drop KIt, Keen Slider, Downswift, react-virtualized
+// algolia integration, re-charts

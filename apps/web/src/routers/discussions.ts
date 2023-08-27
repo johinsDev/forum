@@ -39,6 +39,7 @@ function getQueryDiscussion(
       discussionId: posts.discussionId,
       updatedAt: posts.updatedAt,
       email: users.email,
+      id: posts.id,
     })
     .from(posts)
     .leftJoin(users, eq(posts.userId, users.id))
@@ -105,6 +106,7 @@ function getQueryDiscussion(
           'username',
         ),
         updatedAt: lastPost.updatedAt,
+        id: lastPost.id,
       },
       avatars: sql`
         COALESCE(
@@ -135,8 +137,33 @@ function getQueryDiscussion(
       lastPost.updatedAt,
       lastPost.email,
       replies.count,
+      lastPost.id,
     )
     .where(where)
+}
+
+type DiscussionRow = Omit<
+  Awaited<ReturnType<typeof getQueryDiscussion>>[0],
+  'replies' | 'bodyPreview' | 'avatars' | 'lastPost'
+> & {
+  replies: number | null
+  bodyPreview: string | null
+  avatars: { username: string; image: string }[]
+  lastPost: {
+    username: string
+    updatedAt: Date
+    id: number
+  } | null
+  userCan?: {
+    reply: boolean
+  }
+}
+
+function userCanReply(
+  discussion: DiscussionRow,
+  ctx: ReturnType<typeof createInnerTRPCContext>,
+) {
+  return !!ctx.session?.user
 }
 
 export const discussionsRouter = createTRPCRouter({
@@ -145,20 +172,7 @@ export const discussionsRouter = createTRPCRouter({
       .where(eq(discussions.slug, input))
       .limit(1)
 
-    type Row = Omit<
-      (typeof rows)[0],
-      'replies' | 'bodyPreview' | 'avatars' | 'lastPost'
-    > & {
-      replies: number
-      bodyPreview: string
-      avatars: { username: string; image: string }[]
-      lastPost: {
-        username: string
-        updatedAt: Date
-      }
-    }
-
-    const discussion = rows[0] as Row | undefined
+    const discussion = rows[0] as DiscussionRow | undefined
 
     if (!discussion) {
       throw new TRPCError({
@@ -167,7 +181,12 @@ export const discussionsRouter = createTRPCRouter({
       })
     }
 
-    return discussion
+    return {
+      ...discussion,
+      userCan: {
+        reply: userCanReply(discussion, ctx),
+      },
+    }
   }),
   all: publicProcedure.input(discussionsInput).query(async ({ ctx, input }) => {
     const query = getQueryDiscussion(ctx, input)
@@ -181,23 +200,17 @@ export const discussionsRouter = createTRPCRouter({
       totalRows,
     })
 
-    const rows = await query.limit(meta.limit).offset(meta.offset)
-
-    type Row = Omit<
-      (typeof rows)[0],
-      'replies' | 'bodyPreview' | 'avatars' | 'lastPost'
-    > & {
-      replies: number
-      bodyPreview: string
-      avatars: { username: string; image: string }[]
-      lastPost: {
-        username: string
-        updatedAt: Date
-      }
-    }
+    const rows = (await query
+      .limit(meta.limit)
+      .offset(meta.offset)) as DiscussionRow[]
 
     return {
-      data: rows as Row[],
+      data: rows.map((row) => ({
+        ...row,
+        userCan: {
+          reply: userCanReply(row, ctx),
+        },
+      })),
       meta,
     }
   }),
